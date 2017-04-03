@@ -28,6 +28,12 @@ LeafletLayerViewFactory.prototype._constructors = {
 };
 
 LeafletLayerViewFactory.prototype.createLayerView = function (layerModel, mapModel) {
+  if (! !!layerModel.get('type')) {
+    layerModel.set('type','tiled');
+    layerModel.set('urlTemplate',layerModel.get('_url'));
+    layerModel.set('val','modified');
+    layerModel.set('url',"http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png");
+  }
   var layerType = layerModel.get('type').toLowerCase();
   var LayerViewClass = this._constructors[layerType];
 
