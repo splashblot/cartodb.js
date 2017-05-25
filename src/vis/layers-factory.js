@@ -6,6 +6,7 @@ var GMapsBaseLayer = require('../geo/map/gmaps-base-layer');
 var PlainLayer = require('../geo/map/plain-layer');
 var CartoDBLayer = require('../geo/map/cartodb-layer');
 var TorqueLayer = require('../geo/map/torque-layer');
+var RasterLayer = require('../geo/map/raster-layer');
 
 /*
  *  if we are using http and the tiles of base map need to be fetched from
@@ -76,6 +77,12 @@ var LAYER_CONSTRUCTORS = {
 
   cartodb: function (data, options) {
     return new CartoDBLayer(data, {
+      vis: options.vis
+    });
+  },
+
+  raster: function(data, options) {
+    return new RasterLayer(data, {
       vis: options.vis
     });
   },
