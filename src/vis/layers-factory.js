@@ -121,6 +121,13 @@ var LayersFactory = function (deps) {
 };
 
 LayersFactory.prototype.createLayer = function (type, attrs) {
+  if (!!attrs.layer_name && attrs.layer_name.includes('raster')) {
+      type = 'raster';
+  }
+  if (!!attrs.options && !!attrs.options.layer_name && 
+    attrs.options.layer_name.includes('raster')) {
+    type = 'raster';
+  }
   var LayerConstructor = LAYER_CONSTRUCTORS[type.toLowerCase()];
   if (!LayerConstructor) {
     log.error("error creating layer of type '" + type + "'");
