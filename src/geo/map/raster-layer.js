@@ -137,38 +137,29 @@ var RasterLayer = LayerModelBase.extend({
   },
 
   _newRasterLayer: function () {
-    function currentUser() {
-      return currentEndpoint().match(/http[s]*:\/\/([^.]*).*/)[1];
-    }
+    const USER    = location.href.split('user/')[1].split('/')[0];
+    const DOMAIN  = location.href.split('//')[1].split('/')[0];
+    const APIURL  = `http://${USER}.${DOMAIN}/api/v1/map`;
+    const SELF    = this;
 
     function currentEndpoint() {
-      return "http://dev.tileo.localhost/api/v1/map";
+      return APIURL;
     }
-    var self = this;
     function getourThis(){
-      return self;
+      return SELF;
     }
+
+    //based on torque.js/lib/torque/provider/windshaft.js 
     var request = new XMLHttpRequest();
     request.open('POST', currentEndpoint(), true);
     request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
     request.onload = function() {
         if (this.status >= 200 && this.status < 400){
-            var layergroup = JSON.parse(this.response);
-
-            var tilesEndpoint = currentEndpoint() + '/' + layergroup.layergroupid + '/{z}/{x}/{y}.png';
-
-            var protocol = 'https:' == document.location.protocol ? 'https' : 'http';
-            if (layergroup.cdn_url && layergroup.cdn_url[protocol]) {
-                var domain = layergroup.cdn_url[protocol];
-                if ('http' === protocol) {
-                    domain = '{s}.' + domain;
-                }
-                tilesEndpoint = protocol + '://' + domain + '/' + currentUser() + '/api/v1/map/' + layergroup.layergroupid + '/{z}/{x}/{y}.png';
-            }
-            var self = getourThis();
-            rasterLayer = L.tileLayer(tilesEndpoint, {
+            const DATA = JSON.parse(this.response);
+            const SELF = getourThis();
+            rasterLayer = L.tileLayer(`${currentEndpoint()}/${DATA.layergroupid}/{z}/{x}/{y}.png`, {
                 maxZoom: 18
-            }).addTo(self._vis.map);
+            }).addTo(SELF._vis.map);
         } else {
             throw 'Error calling server: Error ' + this.status + ' -> ' + this.response;
         }
