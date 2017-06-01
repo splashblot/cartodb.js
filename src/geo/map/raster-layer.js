@@ -139,6 +139,7 @@ var RasterLayer = LayerModelBase.extend({
   _newRasterLayer: function () {
     const USER    = location.href.split('user/')[1].split('/')[0]
     const DOMAIN  = location.href.split('//')[1].split('/')[0];
+    const APIKEY  = this._vis.attributes.apiKey;
     const APIURL  = `http://${DOMAIN}/user/${USER}/api/v1/map`;
     const SELF    = this;
 
@@ -151,13 +152,12 @@ var RasterLayer = LayerModelBase.extend({
 
     //based on torque.js/lib/torque/provider/windshaft.js 
     var request = new XMLHttpRequest();
-    request.open('POST', currentEndpoint(), true);
+    request.open('POST', `${currentEndpoint()}?api_key=${APIKEY}`, true);
     request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
     request.onload = function() {
         if (this.status >= 200 && this.status < 400){
             const DATA      = JSON.parse(this.response);
             const SELF      = getourThis();
-            const APIKEY    = SELF._vis.attributes.apiKey;
             const ENDPOINT  = `${currentEndpoint()}/${DATA.layergroupid}/{z}/{x}/{y}.png?api_key=${APIKEY}`;
             rasterLayer = L.tileLayer(ENDPOINT, {
                 maxZoom: 18
