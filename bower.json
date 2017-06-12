@@ -4,10 +4,10 @@
     "cartodb.js",
     "themes/css/cartodb.css"
   ],
-  "version": "3.15.8",
-  "homepage": "https://github.com/CartoDB/cartodb.js",
+  "version": "3.15.10",
+  "homepage": "https://github.com/splashblot/cartodb.js",
   "authors": [
-    "CARTO <support@carto.com>"
+    "CartoDB <adrian@tileo.co>"
   ],
   "description": "CartoDB javascript library",
   "license": "BSD",
