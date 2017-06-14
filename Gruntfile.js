@@ -1,11 +1,12 @@
+var _ = require('underscore');
+var jasmineCfg = require('./grunt/tasks/jasmine');
 
 /**
  *  Grunfile runner file for CartoDB.js
  *  framework
  *
  */
-module.exports = function(grunt) {
-
+module.exports = function (grunt) {
   require('load-grunt-tasks')(grunt);
   require('time-grunt')(grunt);
   var semver = require('semver');
@@ -13,23 +14,18 @@ module.exports = function(grunt) {
   var pkg = grunt.file.readJSON('package.json');
 
   if (!pkg.version || !semver.valid(pkg.version)) {
-    grunt.fail.fatal('package.json version is not valid' , 1);
+    grunt.fail.fatal('package.json version is not valid', 1);
   }
 
   var version = pkg.version.split('.');
-  var VERSION_OBJ =  {
-      major:      version[0],
-      minor:      version[0] + '.' + version[1],
-      bugfixing:  pkg.version
-   }
 
   var config = {
     dist: 'dist',
-    app:  'www',
+    tmp: '.tmp',
     version: {
-      major:      version[0],
-      minor:      version[0] + '.' + version[1],
-      bugfixing:  pkg.version
+      major: version[0],
+      minor: version[0] + '.' + version[1],
+      bugfixing: pkg.version
     },
     pkg: pkg
   };
@@ -38,71 +34,31 @@ module.exports = function(grunt) {
     secrets: {},
     config: config,
     dist: 'dist',
-    app:  'www',
     version: {
-      major:      version[0],
-      minor:      version[0] + '.' + version[1],
-      bugfixing:  pkg.version
+      major: version[0],
+      minor: version[0] + '.' + version[1],
+      bugfixing: pkg.version
     },
-    pkg:  pkg,
+    pkg: pkg,
     gitinfo: {},
+    browserify: require('./grunt/tasks/browserify').task(grunt),
+    exorcise: require('./grunt/tasks/exorcise').task(),
     s3: require('./grunt/tasks/s3').task(grunt, config),
     prompt: require('./grunt/tasks/prompt').task(grunt, config),
     replace: require('./grunt/tasks/replace').task(grunt, config),
     fastly: require('./grunt/tasks/fastly').task(grunt, config),
+    sass: require('./grunt/tasks/scss').task(grunt, config),
     watch: require('./grunt/tasks/watch').task(),
     connect: require('./grunt/tasks/connect').task(config),
+    copy: require('./grunt/tasks/copy').task(config),
     clean: require('./grunt/tasks/clean').task(),
-    compass: require('./grunt/tasks/compass').task(),
-    autoprefixer: require('./grunt/tasks/autoprefixer').task(),
-    useminPrepare: require('./grunt/tasks/useminPrepare').task(),
-    usemin: require('./grunt/tasks/usemin').task(),
-    htmlmin: require('./grunt/tasks/htmlmin').task(),
     concat: require('./grunt/tasks/concat').task(grunt, config),
     uglify: require('./grunt/tasks/uglify').task(),
     cssmin: require('./grunt/tasks/cssmin').task(),
     imagemin: require('./grunt/tasks/imagemin').task(),
-    svgmin: require('./grunt/tasks/svgmin').task(),
-    copy: require('./grunt/tasks/copy').task(grunt, config),
-    filerev: require('./grunt/tasks/filerev').task(),
-    buildcontrol: require('./grunt/tasks/buildcontrol').task(),
     jshint: require('./grunt/tasks/jshint').task(),
-    csslint: require('./grunt/tasks/csslint').task(),
-    concurrent: require('./grunt/tasks/concurrent').task(),
-    jasmine: require('./grunt/tasks/jasmine').task()
+    jasmine: jasmineCfg
   });
-
-
-  /* TASKS */
-
-  grunt.registerTask('serve', function (target) {
-    if (target === 'dist') {
-      return grunt.task.run(['build', 'connect:dist:keepalive']);
-    }
-
-    grunt.task.run([
-      'clean:server',
-      'concurrent:server',
-      'autoprefixer:server',
-      'copy:stageStatic',
-      'connect:livereload',
-      'watch'
-    ]);
-  });
-
-  grunt.registerTask('server', function (target) {
-    grunt.log.warn('The `server` task has been deprecated. Use `grunt serve` to start a server.');
-    grunt.task.run([target ? ('serve:' + target) : 'serve']);
-  });
-
-  grunt.registerTask('check', [
-    'clean:server',
-    'compass:server',
-    'jshint:all',
-    'csslint:check'
-  ]);
-
-  grunt.registerTask('test', [ 'jasmine' ]);
 
   grunt.registerTask('release', [
     'prompt:bump',
@@ -110,7 +66,6 @@ module.exports = function(grunt) {
   ]);
 
   grunt.registerTask('publish', function (target) {
-
     if (!grunt.file.exists('secrets.json')) {
       grunt.fail.fatal('secrets.json file does not exist, copy secrets.example.json and rename it' , 1);
     }
@@ -124,7 +79,7 @@ module.exports = function(grunt) {
         !grunt.config('secrets').S3_SECRET ||
         !grunt.config('secrets').S3_BUCKET
       ) {
-      grunt.fail.fatal('S3 keys not specified in secrets.json' , 1);
+      grunt.fail.fatal('S3 keys not specified in secrets.json', 1);
     }
 
     grunt.task.run([
@@ -156,7 +111,7 @@ module.exports = function(grunt) {
     grunt.config.set('bump', options);
   });
 
-  grunt.registerTask('invalidate', function(){
+  grunt.registerTask('invalidate', function () {
     if (!grunt.file.exists('secrets.json')) {
       grunt.fail.fatal('secrets.json file does not exist, copy secrets.example.json and rename it' , 1);
     }
@@ -168,7 +123,7 @@ module.exports = function(grunt) {
         !grunt.config('secrets').FASTLY_API_KEY ||
         !grunt.config('secrets').FASTLY_CARTODB_SERVICE
       ) {
-      grunt.fail.fatal('Fastly keys not specified in secrets.json' , 1);
+      grunt.fail.fatal('Fastly keys not specified in secrets.json', 1);
     }
 
     grunt.task.run([
@@ -176,40 +131,80 @@ module.exports = function(grunt) {
     ]);
   });
 
-  grunt.registerTask('pages', [ 'buildcontrol:pages' ]);
+  grunt.registerTask('preWatch', function () {
+    grunt.config('config.doWatchify', true); // required for browserify to use watch files instead
+  });
 
-  grunt.registerTask('build', [
-    'dist_js',
-    'useminPrepare',
-    'cssmin',
-    'imagemin',
-    'svgmin',
-    'filerev',
-    'usemin',
-    'htmlmin',
-    'uglify'
-  ]);
+  grunt.registerTask('build-jasmine-specrunners', _
+    .chain(jasmineCfg)
+    .keys()
+    .map(function (name) {
+      return ['jasmine', name, 'build'].join(':');
+    })
+    .value());
 
-  grunt.registerTask('dist_js', [
+  // Define tasks order for each step as if run in isolation,
+  // when registering the actual tasks _.uniq is used to discard duplicate tasks from begin run
+  var allDeps = [
     'set_current_version',
-    'js'
-  ])
-
-  grunt.registerTask('js', [
+    'clean:dist',
     'replace',
     'gitinfo',
-    'clean:dist',
-    'concurrent:dist',
-    'concat',
-    'autoprefixer:dist'
-  ]);
+    'copy:fonts'
+  ];
+  var css = allDeps
+    .concat([
+      'sass',
+      'concat',
+      'cssmin',
+      'imagemin'
+    ]);
+  var js = allDeps
+    .concat([
+      'browserify',
+      'build-jasmine-specrunners'
+    ]);
+  var buildJS = allDeps
+    .concat(js)
+    .concat([
+      'exorcise',
+      'uglify'
+    ]);
+  var devJS = allDeps
+    .concat('preWatch')
+    .concat(js);
+  var watch = [
+    'connect',
+    'watch'
+  ];
 
-  grunt.registerTask('dist', [
-    'set_current_version',
-    'build'
-  ]);
+  grunt.registerTask('lint', 'lint source files', function () {
+    var done = this.async();
+    require('child_process').exec('PATH=$(npm bin):$PATH semistandard', function (error, stdout, stderr) {
+      if (error) {
+        grunt.log.fail(error);
 
-  grunt.registerTask('default', [
-    'dist'
-  ]);
-}
+        // Filter out lines that are ignored,
+        // e.g. "src/foobar.js:0:0: File ignored because of your .eslintignore file. Use --no-ignore to override."
+        grunt.log.fail(stdout.replace(/.+--no-ignore.+(\r?\n|\r)/g, ''));
+        grunt.fail.warn('try `node_modules/.bin/semistandard --format src/filename.js` to auto-format code (you might still need to fix some things manually).');
+      } else {
+        grunt.log.ok('All linted files OK!');
+        grunt.log.writeln('Note that files listed in .eslintignore are not linted');
+      }
+      done();
+    });
+  });
+
+  grunt.registerTask('default', [ 'build' ]);
+  grunt.registerTask('build', _.uniq(buildJS.concat(css)));
+  grunt.registerTask('build:js', _.uniq(buildJS));
+  grunt.registerTask('build:css', _.uniq(css));
+  grunt.registerTask('test', _.uniq(js.concat([
+    'jasmine',
+    'lint'
+  ])));
+  grunt.registerTask('dev', _.uniq(css.concat(devJS).concat('gitinfo').concat(watch)));
+  grunt.registerTask('dev:css', _.uniq(css.concat(watch)));
+  grunt.registerTask('dev:js', _.uniq(devJS.concat(watch)));
+};
