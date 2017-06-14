@@ -6,65 +6,50 @@ var LeafletPlainLayerView = require('./leaflet-plain-layer-view');
 var LeafletCartoDBLayerGroupView = require('./leaflet-cartodb-layer-group-view');
 var LeafletTorqueLayerView = require('./leaflet-torque-layer-view');
 var LeafletCartoDBWebglLayerGroupView = require('./leaflet-cartodb-webgl-layer-group-view');
-var TC = require('tangram.cartodb');
+var TangramCartoCSS = require('tangram-cartocss');
 var RenderModes = require('../../geo/render-modes');
 var util = require('../../core/util');
 
 var MAX_NUMBER_OF_FEATURES_FOR_WEBGL = 10e4;
 
 var LayerGroupViewConstructor = function (layerGroupModel, nativeMap, mapModel) {
-  var renderModeResult = getRenderModeResult(mapModel);
-  log.info('MAP RENDER MODE', renderModeResult);
-
-  if (renderModeResult.mode === RenderModes.VECTOR) {
+  if (canMapBeRenderedClientSide(mapModel)) {
     return new LeafletCartoDBWebglLayerGroupView(layerGroupModel, nativeMap);
   }
 
   return new LeafletCartoDBLayerGroupView(layerGroupModel, nativeMap);
 };
 
-function getRenderModeResult (mapModel) {
+var canMapBeRenderedClientSide = function (mapModel) {
   var mapRenderMode = mapModel.get('renderMode');
 
+  if (mapRenderMode === RenderModes.VECTOR && util.isWebGLSupported()) {
+    return true;
+  }
+
   if (mapRenderMode === RenderModes.RASTER) {
-    return { mode: RenderModes.RASTER, reason: 'forced=raster' };
-  }
-
-  if (!util.isWebGLSupported()) {
-    return { mode: RenderModes.RASTER, reason: 'webgl=no' };
-  }
-
-  if (mapRenderMode === RenderModes.VECTOR) {
-    return { mode: RenderModes.VECTOR, reason: 'webgl=yes,forced=vector' };
+    return false;
   }
 
   // RenderModes.AUTO
   var estimatedFeatureCount = mapModel.getEstimatedFeatureCount();
-  if (!estimatedFeatureCount) {
-    return { mode: RenderModes.RASTER, reason: 'estimatedfeaturecount=not-available' };
-  }
-
-  if (estimatedFeatureCount > MAX_NUMBER_OF_FEATURES_FOR_WEBGL) {
-    return { mode: RenderModes.RASTER, reason: 'too-many-estimated-features=' + estimatedFeatureCount };
-  }
-
-  if (!_.all(mapModel.layers.getCartoDBLayers(), canLayerBeRenderedClientSide)) {
-    return { mode: RenderModes.RASTER, reason: 'cartocss=not-supported' };
-  }
-
-  return {
-    mode: RenderModes.VECTOR,
-    reason: 'webgl=yes,cartocss=supported,valid-estimated-features=' + estimatedFeatureCount
-  };
-}
+  return util.isWebGLSupported() &&
+    estimatedFeatureCount && estimatedFeatureCount < MAX_NUMBER_OF_FEATURES_FOR_WEBGL &&
+    _.all(mapModel.layers.getCartoDBLayers(), canLayerBeRenderedClientSide);
+};
 
 var canLayerBeRenderedClientSide = function (layerModel) {
   var cartoCSS = layerModel.get('meta').cartocss;
-  var result = TC.getSupportedCartoCSSResult(cartoCSS);
-  if (!result.supported) {
-    log.info('[Vector] Unable to render due "' + result.reason + '". Full CartoCSS:\n' + cartoCSS);
+
+  try {
+    TangramCartoCSS.carto2Draw(cartoCSS);
+  } catch (e) {
+    e.message = '[Tangram] Unable to render layer with the following cartoCSS:\n' + cartoCSS + '\nError: ' + e.message;
+    log.error(e);
+    return false;
   }
-  return result.supported;
+
+  return true;
 };
 
 var LeafletLayerViewFactory = function () {};
