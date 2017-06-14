@@ -12,7 +12,7 @@ module.exports = function(grunt) {
 
   var pkg = grunt.file.readJSON('package.json');
 
-  if (!pkg.version || !semver.valid(pkg.version)) {
+  if (!pkg.version || !semver.valid(pkg.version)) {
     grunt.fail.fatal('package.json version is not valid' , 1);
   }
 
