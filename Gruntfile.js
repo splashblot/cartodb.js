@@ -102,7 +102,7 @@ module.exports = function(grunt) {
     'csslint:check'
   ]);
 
-  // grunt.registerTask('test', [ 'jasmine' ]);
+  grunt.registerTask('test', [ 'jasmine' ]);
 
   grunt.registerTask('release', [
     'prompt:bump',
