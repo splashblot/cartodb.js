@@ -8,6 +8,7 @@ var GoogleMapsMapView = MapView.extend({
   initialize: function () {
     _.bindAll(this, '_ready');
     this._isReady = false;
+
     MapView.prototype.initialize.apply(this, arguments);
   },
 
@@ -65,6 +66,10 @@ var GoogleMapsMapView = MapView.extend({
       self.trigger('dblclick', e);
     });
 
+    google.maps.event.addListener(this._gmapsMap, 'bounds_changed', function (e) {
+      self.map.setMapViewSize(self.getSize());
+    });
+
     this.projector = new Projector(this._gmapsMap);
 
     this.projector.draw = this._ready;
@@ -78,9 +83,7 @@ var GoogleMapsMapView = MapView.extend({
   },
 
   _getLayerViewFactory: function () {
-    this._layerViewFactory = this._layerViewFactory || new GMapsLayerViewFactory({
-      vector: this.map.get('vector')
-    });
+    this._layerViewFactory = this._layerViewFactory || new GMapsLayerViewFactory();
 
     return this._layerViewFactory;
   },
@@ -99,14 +102,23 @@ var GoogleMapsMapView = MapView.extend({
     this._gmapsMap.setOptions({ scrollwheel: z });
   },
 
-  _setZoom: function (model, z) {
+  _setZoom: function (z) {
     z = z || 0;
     this._gmapsMap.setZoom(z);
   },
 
-  _setCenter: function (model, center) {
+  _setCenter: function (center) {
     var c = new google.maps.LatLng(center[0], center[1]);
     this._gmapsMap.setCenter(c);
+  },
+
+  _setView: function () {
+    if (this.map.hasChanged('zoom')) {
+      this._setZoom(this.map.get('zoom'));
+    }
+    if (this.map.hasChanged('center')) {
+      this._setCenter(this.map.get('center'));
+    }
   },
 
   _getNativeMap: function () {
@@ -156,6 +168,7 @@ var GoogleMapsMapView = MapView.extend({
 
   invalidateSize: function () {
     google.maps.event.trigger(this._gmapsMap, 'resize');
+    this.map.setMapViewSize(this.getSize());
   },
 
   // GEOMETRY

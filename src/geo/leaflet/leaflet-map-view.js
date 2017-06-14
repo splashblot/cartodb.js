@@ -5,7 +5,6 @@ var MapView = require('../map-view');
 var LeafletLayerViewFactory = require('./leaflet-layer-view-factory');
 
 var LeafletMapView = MapView.extend({
-
   _createNativeMap: function () {
     var self = this;
     var center = this.map.get('center');
@@ -50,11 +49,6 @@ var LeafletMapView = MapView.extend({
       self.trigger('zoomend');
     }, this);
 
-    this._leafletMap.on('move', function () {
-      var c = self._leafletMap.getCenter();
-      self._setModelProperty({ center: [c.lat, c.lng] });
-    });
-
     this._leafletMap.on('dragend', function () {
       var c = self._leafletMap.getCenter();
       this.trigger('dragend', [c.lat, c.lng]);
@@ -62,6 +56,9 @@ var LeafletMapView = MapView.extend({
 
     this._leafletMap.on('moveend', function () {
       var c = self._leafletMap.getCenter();
+      self._setModelProperty({
+        center: [c.lat, c.lng]
+      });
       self.map.trigger('moveend', [c.lat, c.lng]);
     }, this);
 
@@ -71,6 +68,10 @@ var LeafletMapView = MapView.extend({
         center: [c.lat, c.lng]
       });
       self.trigger('drag');
+    }, this);
+
+    this._leafletMap.on('resize', function () {
+      this.map.setMapViewSize(this.getSize());
     }, this);
 
     this.map.bind('change:maxZoom', function () {
@@ -83,10 +84,7 @@ var LeafletMapView = MapView.extend({
   },
 
   _getLayerViewFactory: function () {
-    this._layerViewFactory = this._layerViewFactory || new LeafletLayerViewFactory({
-      vector: this.map.get('vector'),
-      webgl: this.map.get('webgl')
-    });
+    this._layerViewFactory = this._layerViewFactory || new LeafletLayerViewFactory();
 
     return this._layerViewFactory;
   },
@@ -170,7 +168,9 @@ var LeafletMapView = MapView.extend({
   },
 
   _setView: function () {
-    this._leafletMap.setView(this.map.get('center'), this.map.get('zoom') || 0);
+    if (this.map.hasChanged('zoom') || this.map.hasChanged('center')) {
+      this._leafletMap.flyTo(this.map.get('center'), this.map.get('zoom') || 0);
+    }
   },
 
   _getNativeMap: function () {
@@ -222,14 +222,11 @@ var LeafletMapView = MapView.extend({
   },
 
   invalidateSize: function () {
-    // there is a race condition in leaflet. If size is invalidated
-    // and at the same time the center is set the final center is displaced
-    // so set pan to false so the map is not moved and then force the map
-    // to be at the place it should be
-    this._leafletMap.invalidateSize({ pan: false }); // , animate: false });
-    this._leafletMap.setView(this.map.get('center'), this.map.get('zoom') || 0, {
-      animate: false
-    });
+    var center = this.map.get('center');
+    var zoom = this.map.get('zoom');
+    this._leafletMap.invalidateSize({ pan: false, animate: false });
+    this._leafletMap.setView(center, zoom, { pan: false, animate: false });
+    this.map.setMapViewSize(this.getSize());
   },
 
   // GEOMETRY

@@ -17,8 +17,9 @@ var MapLayer = Model.extend({
 
   // PUBLIC API METHODS
 
-  remove: function () {
-    this.trigger('destroy', this);
+  remove: function (opts) {
+    opts = opts || {};
+    this.trigger('destroy', this, this.collection, opts);
   },
 
   update: function (attrs, options) {
@@ -41,6 +42,10 @@ var MapLayer = Model.extend({
 
   isVisible: function () {
     return !!this.get('visible');
+  },
+
+  isHidden: function () {
+    return !this.isVisible();
   },
 
   toggle: function () {

@@ -37,6 +37,7 @@ var CartoDBLayer = LayerModelBase.extend({
 
     this.bind('change', this._onAttributeChanged, this);
     this.infowindow.fields.bind('reset add remove', this._reloadVis, this);
+    this.tooltip.fields.bind('reset add remove', this._reloadVis, this);
 
     LayerModelBase.prototype.initialize.apply(this, arguments);
   },
@@ -113,6 +114,16 @@ var CartoDBLayer = LayerModelBase.extend({
 
   getDataProvider: function () {
     return this._dataProvider;
+  },
+
+  getEstimatedFeatureCount: function () {
+    if (this.isHidden()) {
+      return 0;
+    }
+
+    var meta = this.get('meta');
+    var stats = meta && meta.stats;
+    return stats && stats.estimatedFeatureCount;
   }
 });
 

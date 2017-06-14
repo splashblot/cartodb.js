@@ -10,7 +10,7 @@ var OverlaysView = require('../geo/ui/overlays-view');
  */
 var Vis = View.extend({
   initialize: function (options) {
-    this.model.once('load', this.render, this);
+    this.model.once('reloaded', this.render, this);
     this.model.on('invalidateSize', this._invalidateSize, this);
 
     this._overlaysCollection = this.model.overlaysCollection;
@@ -111,7 +111,7 @@ var Vis = View.extend({
     // This timeout is necessary due to GMaps needs time
     // to load tiles and recalculate its bounds :S
     setTimeout(function () {
-      self.model.centerMapToOrigin();
+      self.model.invalidateSize();
     }, 150);
   }
 });
