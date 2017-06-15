@@ -140,7 +140,7 @@ var RasterLayer = LayerModelBase.extend({
     const USER    = location.href.split('user/')[1].split('/')[0]
     const DOMAIN  = location.href.split('//')[1].split('/')[0];
     const APIKEY  = this._vis.attributes.apiKey;
-    const APIURL  = `http://${DOMAIN}/user/${USER}/api/v1/map`;
+    const APIURL  = `${location.protocol}//${DOMAIN}/user/${USER}/api/v1/map`;
     const SELF    = this;
 
     function currentEndpoint() {
