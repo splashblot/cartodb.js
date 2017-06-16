@@ -64,7 +64,7 @@ Profiler.new_value = function (name, value, type, defer) {
   if (!defer) {
     Profiler._backend && Profiler._backend([type, name, value]);
   } else {
-    var n = performance.now();
+    var n = new Date().getTime()
     // don't allow to send stats quick
     if (n - t.last > 1000) {
       Profiler._backend && Profiler._backend([type, name, t.avg]);
@@ -97,13 +97,13 @@ Metric.prototype = {
   // start a time measurement
   //
   start: function() {
-    this.t0 = performance.now();
+    this.t0 = +new Date();
     return this;
   },
 
   // elapsed time since start was called
   _elapsed: function() {
-    return performance.now() - this.t0;
+    return +new Date() - this.t0;
   },
 
   //

@@ -49,6 +49,11 @@ var LeafletMapView = MapView.extend({
       self.trigger('zoomend');
     }, this);
 
+    this._leafletMap.on('move', function () {
+      var c = self._leafletMap.getCenter();
+      self._setModelProperty({ center: [c.lat, c.lng] });
+    });
+
     this._leafletMap.on('dragend', function () {
       var c = self._leafletMap.getCenter();
       this.trigger('dragend', [c.lat, c.lng]);
@@ -56,9 +61,6 @@ var LeafletMapView = MapView.extend({
 
     this._leafletMap.on('moveend', function () {
       var c = self._leafletMap.getCenter();
-      self._setModelProperty({
-        center: [c.lat, c.lng]
-      });
       self.map.trigger('moveend', [c.lat, c.lng]);
     }, this);
 
@@ -84,7 +86,10 @@ var LeafletMapView = MapView.extend({
   },
 
   _getLayerViewFactory: function () {
-    this._layerViewFactory = this._layerViewFactory || new LeafletLayerViewFactory();
+    this._layerViewFactory = this._layerViewFactory || new LeafletLayerViewFactory({
+      vector: this.map.get('vector'),
+      webgl: this.map.get('webgl')
+    });
 
     return this._layerViewFactory;
   },
@@ -168,9 +173,7 @@ var LeafletMapView = MapView.extend({
   },
 
   _setView: function () {
-    if (this.map.hasChanged('zoom') || this.map.hasChanged('center')) {
-      this._leafletMap.flyTo(this.map.get('center'), this.map.get('zoom') || 0);
-    }
+    this._leafletMap.setView(this.map.get('center'), this.map.get('zoom') || 0);
   },
 
   _getNativeMap: function () {

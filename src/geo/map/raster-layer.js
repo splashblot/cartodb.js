@@ -36,7 +36,7 @@ var RasterLayer = LayerModelBase.extend({
       // });
       // this.unset('legends');
 
-      // this.bind('change', this._onAttributeChanged, this);
+      this.bind('change', this._onAttributeChanged, this);
       // this.infowindow.fields.bind('reset add remove', this._reloadVis, this);
       // this.tooltip.fields.bind('reset add remove', this._reloadVis, this);
 
@@ -63,6 +63,7 @@ var RasterLayer = LayerModelBase.extend({
   },
 
   _onAttributeChanged: function () {
+    debugger;
     var reloadVis = _.any(ATTRIBUTES_THAT_TRIGGER_VIS_RELOAD, function (attr) {
       if (this.hasChanged(attr)) {
         if (attr === 'cartocss' && this._dataProvider) {
@@ -109,6 +110,7 @@ var RasterLayer = LayerModelBase.extend({
   },
 
   getInteractiveColumnNames: function () {
+    return ['cartodb_id'];
     return _.chain(['cartodb_id'])
       .union(this.infowindow.getFieldNames())
       .union(this.tooltip.getFieldNames())

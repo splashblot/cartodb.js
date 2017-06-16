@@ -4,7 +4,6 @@ var Backbone = require('backbone');
 var config = require('cdb.config');
 var log = require('cdb.log');
 var Model = require('../core/model');
-var util = require('../core/util');
 var Layers = require('./map/layers');
 var sanitize = require('../core/sanitize');
 var GeometryFactory = require('./geometry-models/geometry-factory');
@@ -18,8 +17,10 @@ var Map = Model.extend({
     maxZoom: 20,
     scrollwheel: true,
     drag: true,
-    keyboard: !util.supportsTouch(), // #cartodb.js/1652
+    keyboard: true,
     provider: 'leaflet',
+    // enforce client-side rendering using GeoJSON vector tiles
+    vector: false,
     popupsEnabled: true,
     isFeatureInteractivityEnabled: false
   },
@@ -190,7 +191,7 @@ var Map = Model.extend({
     return !this.arePopupsEnabled();
   },
 
-  // GEOMETRY MANAGEMENT
+ // GEOMETRY MANAGEMENT
 
   drawPoint: function () {
     return this._drawGeometry(GeometryFactory.createPoint({
@@ -239,8 +240,8 @@ var Map = Model.extend({
       center: latlng,
       zoom: zoom
     }, {
-        silent: true
-      });
+      silent: true
+    });
     this.trigger('set_view');
   },
 
@@ -383,6 +384,14 @@ var Map = Model.extend({
   },
 
   /**
+  * Checks if the base layer is already in the map as base map
+  */
+  isBaseLayerAdded: function (layer) {
+    var baselayer = this.getBaseLayer();
+    return baselayer && layer.isEqual(baselayer);
+  },
+
+  /**
   * gets the url of the template of the tile layer
   * @method getLayerTemplate
   */
@@ -493,40 +502,24 @@ var Map = Model.extend({
 
   getMapViewSize: function () {
     return this._mapViewSize;
-  },
+  }
 
-  getEstimatedFeatureCount: function () {
-    var acum = 0;
-    var count = 0;
-    var layers = this.layers.getCartoDBLayers();
-    if (!layers) {
-      return;
-    }
-    for (var i = 0; i < layers.length; i++) {
-      count = layers[i].getEstimatedFeatureCount();
-      if (count === undefined) {
-        return;
-      }
-      acum += count;
-    }
-    return acum;
-  },
 }, {
-    PROVIDERS: {
-      GMAPS: 'googlemaps',
-      LEAFLET: 'leaflet'
-    },
+  PROVIDERS: {
+    GMAPS: 'googlemaps',
+    LEAFLET: 'leaflet'
+  },
 
-    latlngToMercator: function (latlng, zoom) {
-      var ll = new L.LatLng(latlng[0], latlng[1]);
-      var pp = L.CRS.EPSG3857.latLngToPoint(ll, zoom);
-      return [pp.x, pp.y];
-    },
+  latlngToMercator: function (latlng, zoom) {
+    var ll = new L.LatLng(latlng[0], latlng[1]);
+    var pp = L.CRS.EPSG3857.latLngToPoint(ll, zoom);
+    return [pp.x, pp.y];
+  },
 
-    mercatorToLatLng: function (point, zoom) {
-      var ll = L.CRS.EPSG3857.pointToLatLng(point, zoom);
-      return [ll.lat, ll.lng];
-    }
-  });
+  mercatorToLatLng: function (point, zoom) {
+    var ll = L.CRS.EPSG3857.pointToLatLng(point, zoom);
+    return [ll.lat, ll.lng];
+  }
+});
 
 module.exports = Map;

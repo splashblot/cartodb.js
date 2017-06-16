@@ -83,7 +83,9 @@ var GoogleMapsMapView = MapView.extend({
   },
 
   _getLayerViewFactory: function () {
-    this._layerViewFactory = this._layerViewFactory || new GMapsLayerViewFactory();
+    this._layerViewFactory = this._layerViewFactory || new GMapsLayerViewFactory({
+      vector: this.map.get('vector')
+    });
 
     return this._layerViewFactory;
   },
@@ -102,23 +104,14 @@ var GoogleMapsMapView = MapView.extend({
     this._gmapsMap.setOptions({ scrollwheel: z });
   },
 
-  _setZoom: function (z) {
+  _setZoom: function (model, z) {
     z = z || 0;
     this._gmapsMap.setZoom(z);
   },
 
-  _setCenter: function (center) {
+  _setCenter: function (model, center) {
     var c = new google.maps.LatLng(center[0], center[1]);
     this._gmapsMap.setCenter(c);
-  },
-
-  _setView: function () {
-    if (this.map.hasChanged('zoom')) {
-      this._setZoom(this.map.get('zoom'));
-    }
-    if (this.map.hasChanged('center')) {
-      this._setCenter(this.map.get('center'));
-    }
   },
 
   _getNativeMap: function () {

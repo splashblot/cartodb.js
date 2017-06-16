@@ -1,6 +1,4 @@
 var $ = require('jquery');
-var config = require('../../cdb.config');
-var log = require('cdb.log');
 
 /**
  * geocoders for different services
@@ -10,13 +8,11 @@ var log = require('cdb.log');
  * (at least)
  */
 var MAPZEN = {
-  geocode: function (address, callback) {
-    var mapzenApiKey = config.get('mapzenApiKey');
-    if (!mapzenApiKey) {
-      log.error('[Mapzen Geocoder] API Key is missing');
-      return;
-    }
+  keys: {
+    app_id: 'search-DH1Lkhw'
+  },
 
+  geocode: function (address, callback) {
     address = address.toLowerCase()
       .replace(/é/g, 'e')
       .replace(/á/g, 'a')
@@ -24,13 +20,12 @@ var MAPZEN = {
       .replace(/ó/g, 'o')
       .replace(/ú/g, 'u');
 
-    var protocol = window.location.protocol;
-    if (protocol.indexOf('http') === -1) {
+    var protocol = '';
+    if (window.location.protocol.indexOf('http') === -1) {
       protocol = 'http:';
     }
 
-    var jqxhr = $.getJSON(protocol + '//search.mapzen.com/v1/search?text=' + encodeURIComponent(address) + '&api_key=' + mapzenApiKey);
-    jqxhr.done(function (data) {
+    $.getJSON(protocol + '//search.mapzen.com/v1/search?text=' + encodeURIComponent(address) + '&api_key=' + this.keys.app_id, function (data) {
       var coordinates = [];
       if (data && data.features && data.features.length > 0) {
         var res = data.features;
@@ -53,9 +48,6 @@ var MAPZEN = {
       if (callback) {
         callback.call(this, coordinates);
       }
-    });
-    jqxhr.fail(function (jqxhr, error) {
-      log.error('[Mapzen Geocoder] error: ' + error);
     });
   }
 };
