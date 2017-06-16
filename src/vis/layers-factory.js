@@ -6,7 +6,7 @@ var GMapsBaseLayer = require('../geo/map/gmaps-base-layer');
 var PlainLayer = require('../geo/map/plain-layer');
 var CartoDBLayer = require('../geo/map/cartodb-layer');
 var TorqueLayer = require('../geo/map/torque-layer');
-
+var RasterLayer = require('../geo/map/raster-layer');
 /*
  *  if we are using http and the tiles of base map need to be fetched from
  *  https try to fix it
@@ -79,6 +79,12 @@ var LAYER_CONSTRUCTORS = {
       vis: options.vis
     });
   },
+  
+  raster: function(data, options) {
+    return new RasterLayer(data, {
+      vis: options.vis
+    });
+  },
 
   torque: function (attrs, options) {
     var windshaftSettings = options.windshaftSettings;
@@ -97,7 +103,7 @@ var LAYER_CONSTRUCTORS = {
           name: windshaftSettings.templateName
         }
       });
-    }
+    },
 
     return new TorqueLayer(attrs, {
       vis: options.vis
@@ -114,6 +120,13 @@ var LayersFactory = function (deps) {
 };
 
 LayersFactory.prototype.createLayer = function (type, attrs) {
+  if (!!attrs.layer_name && attrs.layer_name.includes('raster')) {
+      type = 'raster';
+  }
+  if (!!attrs.options && !!attrs.options.layer_name &&
+    attrs.options.layer_name.includes('raster')) {
+    type = 'raster';
+  }
   var LayerConstructor = LAYER_CONSTRUCTORS[type.toLowerCase()];
   if (!LayerConstructor) {
     log.error("error creating layer of type '" + type + "'");
