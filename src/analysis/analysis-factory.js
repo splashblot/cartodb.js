@@ -53,10 +53,7 @@ AnalysisFactory.prototype._getAnalysisAttributesFromAnalysisDefinition = functio
   var sourceNamesForAnalysisType = this._camshaftReference.getSourceNamesForAnalysisType(analysisType);
   var sourceNodes = {};
   _.each(sourceNamesForAnalysisType, function (sourceName) {
-    var sourceParams = analysisDefinition.params[sourceName];
-    if (sourceParams) {
-      sourceNodes[sourceName] = this.analyse(sourceParams);
-    }
+    sourceNodes[sourceName] = this.analyse(analysisDefinition.params[sourceName]);
   }, this);
 
   return _.omit(_.extend(analysisDefinition, analysisDefinition.params, sourceNodes), 'params');

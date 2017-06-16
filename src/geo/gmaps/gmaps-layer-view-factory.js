@@ -27,13 +27,13 @@ if (typeof (google) !== 'undefined' && typeof (google.maps) !== 'undefined') {
 
 GMapsLayerViewFactory.prototype._constructors = constructors;
 
-GMapsLayerViewFactory.prototype.createLayerView = function (layerModel, nativeMap) {
+GMapsLayerViewFactory.prototype.createLayerView = function (layerModel, mapModel) {
   var layerType = layerModel.get('type').toLowerCase();
   var LayerViewClass = this._constructors[layerType];
 
   if (LayerViewClass) {
     try {
-      return new LayerViewClass(layerModel, nativeMap);
+      return new LayerViewClass(layerModel, mapModel);
     } catch (e) {
       log.error("Error creating an instance of layer view for '" + layerType + "' layer -> " + e.message);
       throw e;

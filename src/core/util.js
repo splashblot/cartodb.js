@@ -127,10 +127,6 @@ util.isMobileDevice = function () {
   return /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 };
 
-util.isWebGLSupported = function () {
-  return !!window.WebGLRenderingContext;
-};
-
 /**
  * Returns true if the string ends with provided suffix
  */
