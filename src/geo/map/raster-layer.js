@@ -47,8 +47,8 @@ var RasterLayer = LayerModelBase.extend({
             {
                 "type": "cartodb",
                 "options": {
-                    "sql": `SELECT * FROM ${attrs.layer_name}`,
-                    "cartocss": `#${attrs.layer_name} {raster-opacity: 0.8;}`,
+                    "sql": "SELECT * FROM" + attrs.layer_name,
+                    "cartocss": attrs.layer_name + "{raster-opacity: 0.8;}",
                     "cartocss_version": "2.3.0",
                     "geom_column": "the_raster_webmercator",
                     "geom_type": "raster"
@@ -142,7 +142,7 @@ var RasterLayer = LayerModelBase.extend({
     const USER    = location.href.split('user/')[1].split('/')[0]
     const DOMAIN  = location.href.split('//')[1].split('/')[0];
     const APIKEY  = this._vis.attributes.apiKey;
-    const APIURL  = `${location.protocol}//${DOMAIN}/user/${USER}/api/v1/map`;
+    const APIURL  = location.protocol+ "//" + DOMAIN + "/user/" + USER + "/api/v1/map";
     const SELF    = this;
 
     function currentEndpoint() {
@@ -154,13 +154,13 @@ var RasterLayer = LayerModelBase.extend({
 
     //based on torque.js/lib/torque/provider/windshaft.js 
     var request = new XMLHttpRequest();
-    request.open('POST', `${currentEndpoint()}?api_key=${APIKEY}`, true);
+    request.open('POST', currentEndpoint() + "?api_key=" + APIKEY, true);
     request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
     request.onload = function() {
         if (this.status >= 200 && this.status < 400){
             const DATA      = JSON.parse(this.response);
             const SELF      = getourThis();
-            const ENDPOINT  = `${currentEndpoint()}/${DATA.layergroupid}/{z}/{x}/{y}.png?api_key=${APIKEY}`;
+            const ENDPOINT  = currentEndpoint() + "/" + DATA.layergroupid + "/{z}/{x}/{y}.png?api_key= " + APIKEY;
             rasterLayer = L.tileLayer(ENDPOINT, {
                 maxZoom: 18
             }).addTo(SELF._vis.map);
