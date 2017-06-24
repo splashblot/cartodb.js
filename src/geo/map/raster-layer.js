@@ -48,7 +48,7 @@ var RasterLayer = LayerModelBase.extend({
                 "type": "cartodb",
                 "options": {
                     "sql": " SELECT * FROM " + attrs.layer_name,
-                    "cartocss": attrs.layer_name + " {raster-opacity: 0.8;}",
+                    "cartocss": "#" + attrs.layer_name + " {raster-opacity: 0.8;}",
                     "cartocss_version": "2.3.0",
                     "geom_column": "the_raster_webmercator",
                     "geom_type": "raster"
