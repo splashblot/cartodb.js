@@ -159,7 +159,7 @@ var RasterLayer = LayerModelBase.extend({
         if (this.status >= 200 && this.status < 400){
             const DATA      = JSON.parse(this.response);
             const SELF      = getourThis();
-            const ENDPOINT  = currentEndpoint() + "/" + DATA.layergroupid + "/{z}/{x}/{y}.png?api_key= " + APIKEY;
+            const ENDPOINT  = currentEndpoint() + "/" + DATA.layergroupid + "/{z}/{x}/{y}.png?api_key=" + APIKEY;
             rasterLayer = L.tileLayer(ENDPOINT, {
                 maxZoom: 18
             }).addTo(SELF._vis.map);
