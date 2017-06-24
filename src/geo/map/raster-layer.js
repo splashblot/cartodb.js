@@ -47,8 +47,8 @@ var RasterLayer = LayerModelBase.extend({
             {
                 "type": "cartodb",
                 "options": {
-                    "sql": "SELECT * FROM " + attrs.layer_name,
-                    "cartocss": attrs.layer_name + "{raster-opacity: 0.8;}",
+                    "sql": " SELECT * FROM " + attrs.layer_name,
+                    "cartocss": attrs.layer_name + " {raster-opacity: 0.8;}",
                     "cartocss_version": "2.3.0",
                     "geom_column": "the_raster_webmercator",
                     "geom_type": "raster"
@@ -63,7 +63,6 @@ var RasterLayer = LayerModelBase.extend({
   },
 
   _onAttributeChanged: function () {
-    debugger;
     var reloadVis = _.any(ATTRIBUTES_THAT_TRIGGER_VIS_RELOAD, function (attr) {
       if (this.hasChanged(attr)) {
         if (attr === 'cartocss' && this._dataProvider) {
