@@ -4,7 +4,7 @@ var LayerModelBase = require('./layer-model-base');
 var InfowindowTemplate = require('./infowindow-template');
 var TooltipTemplate = require('./tooltip-template');
 var Legends = require('./legends/legends');
-var Window.LayerGroupCollection = {};
+Window.LayerGroupCollection = {};
 var ATTRIBUTES_THAT_TRIGGER_VIS_RELOAD = ['sql', 'source', 'sql_wrap', 'cartocss'];
 
 var RasterLayer = LayerModelBase.extend({
