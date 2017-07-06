@@ -4,7 +4,7 @@ var LayerModelBase = require('./layer-model-base');
 var InfowindowTemplate = require('./infowindow-template');
 var TooltipTemplate = require('./tooltip-template');
 var Legends = require('./legends/legends');
-
+var Window.LayerGroupCollection = {};
 var ATTRIBUTES_THAT_TRIGGER_VIS_RELOAD = ['sql', 'source', 'sql_wrap', 'cartocss'];
 
 var RasterLayer = LayerModelBase.extend({
@@ -160,6 +160,7 @@ var RasterLayer = LayerModelBase.extend({
             const DATA      = JSON.parse(this.response);
             const SELF      = getourThis();
             const ENDPOINT  = currentEndpoint() + "/" + DATA.layergroupid + "/{z}/{x}/{y}.png?api_key=" + APIKEY;
+	    Window.LayerGroupCollection[SELF.attributes.layer_name] = DATA.layergroupid;
             rasterLayer = L.tileLayer(ENDPOINT, {
                 maxZoom: 18
             }).addTo(SELF._vis.map);
