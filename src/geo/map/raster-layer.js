@@ -138,7 +138,7 @@ var RasterLayer = LayerModelBase.extend({
   },
 
   _newRasterLayer: function () {
-    const USER    = location.href.split('user/')[1].split('/')[0]
+    const USER    = location.href.split('user/')[1].split('/')[0];
     const DOMAIN  = location.href.split('//')[1].split('/')[0];
     const APIKEY  = this._vis.attributes.apiKey;
     const APIURL  = location.protocol+ "//" + DOMAIN + "/user/" + USER + "/api/v1/map";
