@@ -121,11 +121,11 @@ var LayersFactory = function (deps) {
 };
 
 LayersFactory.prototype.createLayer = function (type, attrs) {
-  if (!!attrs.layer_name && attrs.layer_name.indexOf('raster') != -1) {
+  if (!!attrs.layer_name && attrs.layer_name.indexOf('_raster') != -1) {
       type = 'raster';
   }
   if (!!attrs.options && !!attrs.options.layer_name && 
-    attrs.options.layer_name.indexOf('raster') != -1) {
+    attrs.options.layer_name.indexOf('_raster') != -1) {
     type = 'raster';
   }
   var LayerConstructor = LAYER_CONSTRUCTORS[type.toLowerCase()];
