@@ -10,8 +10,7 @@ var ATTRIBUTES_THAT_TRIGGER_VIS_RELOAD = ['sql', 'source', 'sql_wrap', 'cartocss
 var RasterLayer = LayerModelBase.extend({
   defaults: {
     type: 'Raster',
-    attribution: config.get('cartodb_attributions'),
-    visible: true
+    attribution: config.get('cartodb_attributions')
   },
 
   initialize: function (attrs, options) {
@@ -138,6 +137,7 @@ var RasterLayer = LayerModelBase.extend({
   },
 
   _newRasterLayer: function () {
+    if (this.attributes.visible == false) return false;
     const USER    = location.href.split('user/')[1].split('/')[0];
     const DOMAIN  = location.href.split('//')[1].split('/')[0];
     const APIKEY  = this._vis.attributes.apiKey;
