@@ -47,7 +47,7 @@ var RasterLayer = LayerModelBase.extend({
                 "type": "cartodb",
                 "options": {
                     "sql": " SELECT * FROM " + attrs.layer_name,
-                    "cartocss": "#" + attrs.layer_name + " {raster-opacity: 0.8;}",
+                    "cartocss": "#" + attrs.layer_name + " {raster-opacity: 1}",
                     "cartocss_version": "2.3.0",
                     "geom_column": "the_raster_webmercator",
                     "geom_type": "raster"
@@ -137,7 +137,6 @@ var RasterLayer = LayerModelBase.extend({
   },
 
   _newRasterLayer: function () {
-    if (this.attributes.visible == false) return false;
     const USER    = location.href.split('user/')[1].split('/')[0];
     const DOMAIN  = location.href.split('//')[1].split('/')[0];
     const APIKEY  = this._vis.attributes.apiKey;
@@ -160,7 +159,10 @@ var RasterLayer = LayerModelBase.extend({
             const DATA      = JSON.parse(this.response);
             const SELF      = getourThis();
             const ENDPOINT  = currentEndpoint() + "/" + DATA.layergroupid + "/{z}/{x}/{y}.png?api_key=" + APIKEY;
-	    Window.LayerGroupCollection[SELF.attributes.layer_name] = DATA.layergroupid;
+      Window.LayerGroupCollection[SELF.attributes.layer_name] = DATA.layergroupid;
+         
+            // store layergroupid on LayerGroupCollection but don't load the layer on the map yet
+            if (SELF.attributes.visible == false) return false;
             rasterLayer = L.tileLayer(ENDPOINT, {
                 maxZoom: 18
             }).addTo(SELF._vis.map);
