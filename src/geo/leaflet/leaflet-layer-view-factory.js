@@ -46,7 +46,7 @@ LeafletLayerViewFactory.prototype.createLayerView = function (layerModel, mapMod
       log.error("Error creating an instance of layer view for '" + layerType + "' layer -> " + e.message);
       throw e;
     }
-  } else {
+  } else if( layerType != 'raster') { {
     log.error("Error creating an instance of layer view for '" + layerType + "' layer. Type is not supported");
   }
 };
