@@ -50,7 +50,7 @@ WindshaftClient.prototype.instantiateMap = function (options) {
 
   var ajaxOptions = {
     success: function (data) {
-      if (data.errors) {
+      if (data.errors && data.errors[0].indexOf('_raster') == -1) {
         errorCallback(data);
       } else {
         successCallback(data);
