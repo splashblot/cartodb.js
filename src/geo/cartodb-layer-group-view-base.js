@@ -4,6 +4,11 @@ function CartoDBLayerGroupViewBase (layerGroupModel, nativeMap) {
 
   layerGroupModel.on('change:urls', this._reload, this);
   layerGroupModel.onLayerVisibilityChanged(this._reload.bind(this));
+  /** dirty raster hack **/
+  var layers = layerGroupModel._layersCollection.models;
+  for(ele in layers){
+    if(layers[ele].attributes.layer_name && layers[ele].attributes.layer_name.indexOf('_raster') > 0) layers[ele].attributes.type = 'raster';
+  }
 
   this._reload();
 }
