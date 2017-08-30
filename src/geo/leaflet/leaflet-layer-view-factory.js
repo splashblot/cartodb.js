@@ -66,6 +66,15 @@ var canLayerBeRenderedClientSide = function (layerModel) {
   return result.supported;
 };
 
+var canLayerBeRenderedClientSide = function (layerModel) {
+  var cartoCSS = layerModel.get('meta').cartocss;
+  var result = TC.getSupportedCartoCSSResult(cartoCSS);
+  if (!result.supported) {
+    log.info('[Vector] Unable to render due "' + result.reason + '". Full CartoCSS:\n' + cartoCSS);
+  }
+  return result.supported;
+};
+
 LeafletLayerViewFactory.prototype._constructors = {
   'tiled': LeafletTiledLayerView,
   'wms': LeafletWMSLayerView,
