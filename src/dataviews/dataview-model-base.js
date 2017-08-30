@@ -120,6 +120,46 @@ module.exports = Model.extend({
     }
   },
 
+  _onChangeBinds: function () {
+    this.on('change:sync_on_bbox_change', function () {
+      this.refresh();
+    }, this);
+
+    this.listenTo(this._map, 'change:center change:zoom', _.debounce(this._onMapBoundsChanged.bind(this), BOUNDING_BOX_FILTER_WAIT));
+
+    this.on('change:url', function (model, value, opts) {
+      if (this.syncsOnDataChanges()) {
+        this._newDataAvailable = true;
+      }
+      if (this._shouldFetchOnURLChange(opts && _.pick(opts, ['forceFetch', 'sourceId']))) {
+        this.fetch();
+      }
+    }, this);
+
+    this.on('change:enabled', function (mdl, isEnabled) {
+      if (isEnabled && this._newDataAvailable) {
+        this.fetch();
+        this._newDataAvailable = false;
+      }
+    }, this);
+  },
+
+  _onMapBoundsChanged: function () {
+    if (this._shouldFetchOnBoundingBoxChange()) {
+      this.fetch();
+    }
+
+    if (this.syncsOnBoundingBoxChanges()) {
+      this._newDataAvailable = true;
+    }
+  },
+
+  _initialFetch: function () {
+    this.fetch({
+      success: this._onChangeBinds.bind(this)
+    });
+  },
+
   _setupAnalysisStatusEvents: function () {
     this._removeExistingAnalysisBindings();
     this._analysis = this._analysisCollection.get(this.getSourceId());
@@ -151,8 +191,9 @@ module.exports = Model.extend({
   },
 
   /**
-   * @private
+   * @protected
    */
+
   _onFilterChanged: function (filter) {
     var layerDataProvider = this._getLayerDataProvider();
     if (layerDataProvider && layerDataProvider.canApplyFilterTo(this)) {
@@ -162,9 +203,6 @@ module.exports = Model.extend({
     }
   },
 
-  /**
-   * @protected
-   */
   _reloadVis: function (opts) {
     opts = opts || {};
     this._vis.reload(
@@ -191,40 +229,6 @@ module.exports = Model.extend({
    */
   _onLayerVisibilityChanged: function (model, value) {
     this.set({enabled: value});
-  },
-
-  _onChangeBinds: function () {
-    this.on('change:sync_on_bbox_change', function () {
-      this.refresh();
-    }, this);
-
-    this.listenTo(this._map, 'change:center change:zoom', _.debounce(this._onMapBoundsChanged.bind(this), BOUNDING_BOX_FILTER_WAIT));
-
-    this.on('change:url', function (model, value, opts) {
-      if (this.get('sync_on_data_change')) {
-        this._newDataAvailable = true;
-      }
-      if (this._shouldFetchOnURLChange(opts && _.pick(opts, ['forceFetch', 'sourceId']))) {
-        this.fetch();
-      }
-    }, this);
-
-    this.on('change:enabled', function (mdl, isEnabled) {
-      if (isEnabled && this._newDataAvailable) {
-        this.fetch();
-        this._newDataAvailable = false;
-      }
-    }, this);
-  },
-
-  _onMapBoundsChanged: function () {
-    if (this._shouldFetchOnBoundingBoxChange()) {
-      this.fetch();
-    }
-
-    if (this.get('sync_on_bbox_change')) {
-      this._newDataAvailable = true;
-    }
   },
 
   _shouldFetchOnURLChange: function (options) {
@@ -300,8 +304,18 @@ module.exports = Model.extend({
     throw new Error('toJSON should be defined for each dataview');
   },
 
-  hasSameSourceAsLayer: function () {
-    return this.getSourceId() === this.layer.get('source');
+  getSourceType: function () {
+    var sourceAnalysis = this.getSource();
+    return sourceAnalysis && sourceAnalysis.get('type');
+  },
+
+  getLayerName: function () {
+    return this.layer && this.layer.get('layer_name');
+  },
+
+  getSource: function () {
+    var sourceId = this.getSourceId();
+    return sourceId && this._analysisCollection.get(sourceId);
   },
 
   getSourceId: function () {

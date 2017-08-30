@@ -47,7 +47,10 @@ describe('dataviews/dataview-model-base', function () {
     this.vis._onMapInstantiatedForTheFirstTime();
 
     this.analysisCollection = new Backbone.Collection();
-    this.a0 = this.analysisCollection.add({id: 'a0'});
+    this.a0 = this.analysisCollection.add({
+      id: 'a0',
+      type: 'source'
+    });
     this.layer = new Backbone.Model();
     this.layer.getDataProvider = jasmine.createSpy('getDataProvider');
 
@@ -214,10 +217,15 @@ describe('dataviews/dataview-model-base', function () {
       this.model.set('enabled', false);
       this.model.set('sync_on_data_change', false);
       spyOn(this.model, 'fetch');
+
       this.model.trigger('change:url', this.model, {}, { forceFetch: true });
+
       expect(this.model.fetch).toHaveBeenCalled();
+
       this.model.fetch.calls.reset();
+
       this.model.trigger('change:url', this.model, {}, { forceFetch: false });
+
       expect(this.model.fetch).not.toHaveBeenCalled();
     });
 
@@ -594,6 +602,37 @@ describe('dataviews/dataview-model-base', function () {
 
       expect(this.vis.reload).toHaveBeenCalled();
       expect(this.geoJSONDataProvider.applyFilter).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getSourceType', function () {
+    it('should return the type of the source', function () {
+      var dataview = new DataviewModelBase({
+        source: { id: 'a0' }
+      }, {
+        layer: this.layer,
+        map: this.map,
+        vis: this.vis,
+        analysisCollection: this.analysisCollection
+      });
+
+      expect(dataview.getSourceType()).toEqual('source');
+    });
+  });
+
+  describe('getLayerName', function () {
+    it('should return the name of the source', function () {
+      var dataview = new DataviewModelBase({
+        source: { id: 'a0' }
+      }, {
+        layer: this.layer,
+        map: this.map,
+        vis: this.vis,
+        analysisCollection: this.analysisCollection
+      });
+      this.layer.set('layer_name', 'the name');
+
+      expect(dataview.getLayerName()).toEqual('the name');
     });
   });
 

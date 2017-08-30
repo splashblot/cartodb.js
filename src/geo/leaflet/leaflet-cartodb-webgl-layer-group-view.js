@@ -1,3 +1,4 @@
+var log = require('cdb.log');
 var _ = require('underscore');
 var L = require('leaflet');
 var TC = require('tangram.cartodb');
@@ -12,8 +13,19 @@ var LeafletCartoDBWebglLayerGroupView = function (layerGroupModel, leafletMap) {
 
   this.tangram = new TC(leafletMap);
 
-  layerGroupModel.forEachGroupedLayer(this._onLayerAdded, this);
-  layerGroupModel.onLayerAdded(this._onLayerAdded.bind(this));
+  this.tangram = new TC(leafletMap, this.initConfig.bind(this, layerGroupModel));
+
+  this.tangram.onLoaded(function () {
+    if (metric) {
+      self.trigger('load');
+      metric.end();
+      metric = void 0;
+
+      log.info('Rendered Geometries Count: ', self.tangram.getTotalGeometries());
+    }
+  });
+
+  this.layerGroupModel = layerGroupModel;
 };
 
 LeafletCartoDBWebglLayerGroupView.prototype = _.extend(
