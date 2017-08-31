@@ -27,8 +27,8 @@ LeafletLayerViewFactory.prototype._constructors = {
   'torque': LeafletTorqueLayerView
 };
 
-LeafletLayerViewFactory.prototype.createLayerView = function (layerModel, mapModel) {
- if (! !!layerModel.get('type')) {
+LeafletLayerViewFactory.prototype.createLayerView = function (layerModel, nativeMap, mapModel) {
+  if (! !!layerModel.get('type')) {
      layerModel.set('type','tiled');
      layerModel.set('urlTemplate',layerModel.get('_url'));
      layerModel.set('val','modified');
