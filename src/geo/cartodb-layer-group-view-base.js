@@ -7,7 +7,7 @@ function CartoDBLayerGroupViewBase (layerGroupModel, nativeMap) {
   /** dirty raster hack **/
   var layers = layerGroupModel._layersCollection.models;
   for(ele in layers){
-    if(layers[ele].attributes.layer_name && layers[ele].attributes.layer_name.indexOf('_raster') > 0) layers[ele].attributes.type = 'raster';
+    if(layers[ele].attributes.layer_name && layers[ele].attributes.layer_name.indexOf('_raster') > 0) layers[ele].attributes.type = 'raster_tileo';
   }
 
   this._reload();

@@ -9,7 +9,7 @@ var ATTRIBUTES_THAT_TRIGGER_VIS_RELOAD = ['sql', 'source', 'sql_wrap', 'cartocss
 
 var RasterLayer = LayerModelBase.extend({
   defaults: {
-    type: 'Raster',
+    type: 'raster_tileo',
     attribution: config.get('cartodb_attributions')
   },
 
