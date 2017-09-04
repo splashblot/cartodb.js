@@ -25,7 +25,7 @@ LeafletLayerViewFactory.prototype._constructors = {
   'plain': LeafletPlainLayerView,
   'layergroup': LayerGroupViewConstructor,
   'torque': LeafletTorqueLayerView,
-  'raster_tileo' : LeafletTiledLayerView
+  'raster_tileo' : 'TODO'
 };
 
 LeafletLayerViewFactory.prototype.createLayerView = function (layerModel, nativeMap, mapModel) {
