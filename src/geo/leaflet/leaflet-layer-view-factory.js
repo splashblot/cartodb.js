@@ -46,7 +46,7 @@ LeafletLayerViewFactory.prototype.createLayerView = function (layerModel, native
       log.error("Error creating an instance of layer view for '" + layerType + "' layer -> " + e.message);
       throw e;
     }
-  } else {
+  } else if (layerType != 'raster_tileo') {
     log.error("Error creating an instance of layer view for '" + layerType + "' layer. Type is not supported");
   }
 };
