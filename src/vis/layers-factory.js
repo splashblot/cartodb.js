@@ -81,7 +81,7 @@ var LAYER_CONSTRUCTORS = {
     });
   },
 
-  raster: function(data, options) {
+  raster_tileo: function(data, options) {
     return new RasterLayer(data, {
       vis: options.vis
     });
