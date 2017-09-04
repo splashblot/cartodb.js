@@ -4,6 +4,7 @@ var LeafletWMSLayerView = require('./leaflet-wms-layer-view');
 var LeafletPlainLayerView = require('./leaflet-plain-layer-view');
 var LeafletCartoDBLayerGroupView = require('./leaflet-cartodb-layer-group-view');
 var LeafletTorqueLayerView = require('./leaflet-torque-layer-view');
+var LeafletRasterTileoLayerView = require('./leaflet-raster-tileo-layer-view');
 var LeafletCartoDBWebglLayerGroupView = require('./leaflet-cartodb-webgl-layer-group-view');
 
 var LayerGroupViewConstructor = function (layerGroupModel, mapModel, options) {
