@@ -39,7 +39,7 @@ LeafletLayerViewFactory.prototype.createLayerView = function (layerModel, native
   var layerType = layerModel.get('type').toLowerCase();
   var LayerViewClass = this._constructors[layerType];
 
-  if (LayerViewClass) {
+  if (LayerViewClass && layerType != 'raster_tileo') { //avoid duplicate rasters
     try {
       return new LayerViewClass(layerModel, nativeMap, mapModel);
     } catch (e) {
