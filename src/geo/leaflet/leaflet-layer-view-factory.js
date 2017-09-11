@@ -36,14 +36,8 @@ LeafletLayerViewFactory.prototype.createLayerView = function (layerModel, native
      layerModel.set('val','modified');
      layerModel.set('url',"http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png");
   }
-  // force vector layers to get on top
-  var layers = vis.getLayers();
-  var layersLength = layers.length;
-  for (var layer in layers) {
-    var lay = layers[layer];
-    if (!lay.attributes.table_name) continue;
-    lay.attributes.order = (lay.attributes.table_name.indexOf('_raster') > 0) ? 1 : layersLength;
-  }
+  
+  layerModel.attributes.order = (layerModel.attributes.type == 'raster_tileo') ? 1 : layerModel.attributes.order;
   var layerType = layerModel.get('type').toLowerCase();
   var LayerViewClass = this._constructors[layerType];
 
