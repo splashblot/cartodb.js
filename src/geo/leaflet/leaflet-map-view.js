@@ -124,6 +124,21 @@ var LeafletMapView = MapView.extend({
       }
     }
 
+    // force vector layers to get on top
+    var currentLayers = this.map.layers;
+    var newLayers = []; 
+
+    for (var mdl in this.map.layers.models) {
+      mdl = this.map.layers.models[mdl];
+      if (!!mdl.attributes.table_name && mdl.attributes.table_name.indexOf('_raster') > 0) {
+        // down on the stack
+        newLayers.splice(1, 0, mdl);
+      } else {
+        // up on the stack (vectorial)
+        newLayers.push(mdl);
+      }   
+    }
+
     this.map.layers.each(function (layerModel) {
       var layerView = findLayerView(layerModel);
       if (!layerView) {
