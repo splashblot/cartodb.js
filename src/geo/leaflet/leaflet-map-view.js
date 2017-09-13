@@ -125,9 +125,7 @@ var LeafletMapView = MapView.extend({
     }
 
     // force vector layers to get on top
-    var currentLayers = this.map.layers;
     var newLayers = []; 
-
     for (var mdl in this.map.layers.models) {
       mdl = this.map.layers.models[mdl];
       if (!!mdl.attributes.table_name && mdl.attributes.table_name.indexOf('_raster') > 0) {
@@ -138,6 +136,7 @@ var LeafletMapView = MapView.extend({
         newLayers.push(mdl);
       }   
     }
+    this.map.layers.models = newLayers;
 
     this.map.layers.each(function (layerModel) {
       var layerView = findLayerView(layerModel);
