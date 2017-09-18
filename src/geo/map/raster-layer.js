@@ -141,6 +141,9 @@ var RasterLayer = LayerModelBase.extend({
     var USER = '';
     if (CURRENTURI.href.split('user/').length === 2) {
       USER = CURRENTURI.href.split('user/')[1].split('/')[0];
+    } else if (CURRENTURI.href.split('/u/').length == 2) {
+      // organizations & domains mode
+      USER = CURRENTURI.href.split('/u/')[1].split('/')[0]
     } else {
       USER = CURRENTURI.href.split('//')[1].split('/')[0].split('.')[0];
     }
