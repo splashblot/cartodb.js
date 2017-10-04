@@ -4,6 +4,7 @@ var Backbone = require('backbone');
 var TILED_LAYER_TYPE = 'Tiled';
 var CARTODB_LAYER_TYPE = 'CartoDB';
 var TORQUE_LAYER_TYPE = 'torque';
+var RASTER_TILEO_LAYER_TYPE = 'raster_tileo';
 
 var Layers = Backbone.Collection.extend({
 
@@ -34,7 +35,7 @@ var Layers = Backbone.Collection.extend({
         }, {});
 
         var lastOrder = 1;
-        var sortedTypes = [CARTODB_LAYER_TYPE, TORQUE_LAYER_TYPE, TILED_LAYER_TYPE];
+        var sortedTypes = [CARTODB_LAYER_TYPE, RASTER_TILEO_LAYER_TYPE, TORQUE_LAYER_TYPE, TILED_LAYER_TYPE];
         _.each(sortedTypes, function (layerType) {
           var layers = layersByType[layerType] || [];
           _.each(layers, function (layerModel) {
