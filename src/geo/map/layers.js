@@ -28,6 +28,7 @@ var Layers = Backbone.Collection.extend({
       if (this.size() > 1) {
         var layersByType = this.reduce(function (layersByType, layerModel, index) {
           var type = layerModel.get('type');
+          type = (!!layerModel.attributes.layer_name.indexOf('_raster') > 0) ? 'raster_tileo' : type;
           if (index === 0 && type === TILED_LAYER_TYPE) { return layersByType; }
           layersByType[type] = layersByType[type] || [];
           layersByType[type].push(layerModel);
