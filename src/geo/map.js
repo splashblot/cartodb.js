@@ -124,6 +124,11 @@ var Map = Model.extend({
     return this._addNewLayerModel('plain', attrs, options);
   },
 
+  createRasterTileoLayer: function (attrs, options) {
+    this._checkProperties(attrs, ['sql|source', 'cartocss']);
+    return this._addNewLayerModel('raster_tileo', attrs, options);
+  },
+
   _checkProperties: function (obj, requiredProperties) {
     var missingProperties = _.select(requiredProperties, function (property) {
       var properties = property.split('|');
