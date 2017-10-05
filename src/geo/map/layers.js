@@ -1,7 +1,7 @@
 var _ = require('underscore');
 var Backbone = require('backbone');
 
-var TILED_LAYER_TYPE = 'Tiled';
+var TILED_LAYER_TYPE = 'tiled';
 var CARTODB_LAYER_TYPE = 'CartoDB';
 var TORQUE_LAYER_TYPE = 'torque';
 var RASTER_TILEO_LAYER_TYPE = 'raster_tileo';
