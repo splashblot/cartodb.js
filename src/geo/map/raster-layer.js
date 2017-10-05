@@ -86,6 +86,10 @@ var RasterLayer = LayerModelBase.extend({
     this.set('cartocss', this.get('initialStyle'));
   },
 
+  setOpacity: function (layer_name, opacity) {
+    this.set('cartocss', "#" + attrs.layer_name + " {raster-opacity: " + opacity +"}");
+  },
+
   isVisible: function () {
     return this.get('visible');
   },
