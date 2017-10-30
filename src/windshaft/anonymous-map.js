@@ -8,6 +8,7 @@ var HTTP_LAYER_TYPE = 'http';
 var PLAIN_LAYER_TYPE = 'plain';
 var MAPNIK_LAYER_TYPE = 'mapnik';
 var TORQUE_LAYER_TYPE = 'torque';
+var RASTER_LAYER_TYPE = 'mapnik';
 
 var optionsForHTTPLayer = function (layerModel) {
   return {
@@ -70,6 +71,27 @@ var optionsForTorqueLayer = function (layerModel) {
   };
 };
 
+
+var optionsForRasterLayer = function (layerModel) {
+  var options = {
+      "sql": " SELECT * FROM " + layerModel.get('layer_name'),
+      "cartocss": "#" + layerModel.get('layer_name') + " {raster-opacity: 1}",
+      "cartocss_version": "2.3.0",
+      "geom_column": "the_raster_webmercator",
+      "geom_type": "raster"
+  }
+  return {
+    id: layerModel.get('id'),
+    type: 'cartodb',
+    options: options
+  };
+};
+
+
+"options": 
+
+
+
 var sharedOptionsForMapnikAndTorqueLayers = function (layerModel) {
   var options = {
     cartocss: layerModel.get('cartocss'),
@@ -117,7 +139,10 @@ var AnonymousMap = MapBase.extend({
       return optionsForMapnikLayer(layerModel);
     } else if (LayerTypes.isTorqueLayer(layerModel)) {
       return optionsForTorqueLayer(layerModel);
+    } else if (LayerTypes.isRasterLayer(layerModel)) {
+      return optionsForRasterLayer(layerModel);
     }
+
   },
 
   _calculateDataviewsSection: function () {

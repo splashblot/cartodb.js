@@ -183,7 +183,7 @@ var RasterLayer = LayerModelBase.extend({
             throw 'Error calling server: Error ' + this.status + ' -> ' + this.response;
         }
     };
-    request.send(JSON.stringify(this.config));
+    //request.send(JSON.stringify(this.config));
 
   }
 });

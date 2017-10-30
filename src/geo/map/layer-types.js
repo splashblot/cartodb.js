@@ -4,6 +4,7 @@ var WMS_LAYER_TYPE = 'WMS';
 var GMAPS_BASE_LAYER_TYPE = 'GMapsBase';
 var CARTODB_LAYER_TYPE = 'CartoDB';
 var TORQUE_LAYER_TYPE = 'torque';
+var RASTER_LAYER_TYPE = 'raster_tileo';
 
 var isLayerOfType = function (layerModel, layerType) {
   return layerModel.get('type').toLowerCase() === layerType.toLowerCase();
@@ -32,5 +33,9 @@ module.exports = {
 
   isTorqueLayer: function (layerModel) {
     return isLayerOfType(layerModel, TORQUE_LAYER_TYPE);
+  },
+
+  isRasterLayer: function (layerModel) {
+    return isLayerOfType(layerModel, RASTER_LAYER_TYPE);
   }
 };
