@@ -88,10 +88,6 @@ var optionsForRasterLayer = function (layerModel) {
 };
 
 
-"options": 
-
-
-
 var sharedOptionsForMapnikAndTorqueLayers = function (layerModel) {
   var options = {
     cartocss: layerModel.get('cartocss'),
