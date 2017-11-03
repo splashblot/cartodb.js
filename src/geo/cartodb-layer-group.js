@@ -24,7 +24,7 @@ var CartoDBLayerGroup = Backbone.Model.extend({
   },
 
   _getGroupedLayers: function () {
-    return this._layersCollection.getCartoDBLayers().concat(this._layersCollection.getRasterLayers());
+    return this._layersCollection.getCartoAndRasterLayers();
   },
 
   _getLayers: function () {
