@@ -56,6 +56,10 @@ var Layers = Backbone.Collection.extend({
     return this._getLayersByType(CARTODB_LAYER_TYPE);
   },
 
+  getRasterLayers: function () {
+    return this._getLayersByType(RASTER_TILEO_LAYER_TYPE);
+  },
+
   getTiledLayers: function () {
     return this._getLayersByType(TILED_LAYER_TYPE);
   },
