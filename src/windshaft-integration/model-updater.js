@@ -120,7 +120,7 @@ ModelUpdater.prototype._generateAttributesBaseURL = function (windshaftMap, inde
 ModelUpdater.prototype._updateLayerModels = function (windshaftMap) {
   // CartoDB / mapnik layers
   var indexesOfMapnikLayers = windshaftMap.getLayerIndexesByType('mapnik');
-  _.each(this._layersCollection.getCartoDBLayers(), function (layerModel, localLayerIndex) {
+  _.each(this._layersCollection.getCartoDBLayers().concat(this._layersCollection.getRasterLayers()), function (layerModel, localLayerIndex) {
     var windshaftMapLayerIndex = indexesOfMapnikLayers[localLayerIndex];
     layerModel.set('meta', windshaftMap.getLayerMetadata(windshaftMapLayerIndex));
     this._updateLegendModels(layerModel, windshaftMapLayerIndex, windshaftMap);
