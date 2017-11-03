@@ -87,7 +87,7 @@ var Layers = Backbone.Collection.extend({
 
     var movingLayer = this.at(from);
 
-    if (!movingLayer || movingLayer.get('type') !== CARTODB_LAYER_TYPE) {
+    if (!movingLayer || movingLayer.get('type') !== CARTODB_LAYER_TYPE && movingLayer.get('type') !== RASTER_TILEO_LAYER_TYPE) {
       return false;
     }
 
