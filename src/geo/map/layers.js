@@ -28,7 +28,7 @@ var Layers = Backbone.Collection.extend({
       if (this.size() > 1) {
         var layersByType = this.reduce(function (layersByType, layerModel, index) {
           var type = layerModel.get('type');
-          type = (!!layerModel.attributes.layer_name && layerModel.attributes.layer_name.indexOf('_raster') > 0) ? 'raster_tileo' : type;
+          type = (!!layerModel.attributes.layer_name && layerModel.attributes.layer_name.indexOf('_raster') > 0) ? 'CartoDB' : type;
           if (index === 0 && type === TILED_LAYER_TYPE) { return layersByType; }
           layersByType[type] = layersByType[type] || [];
           layersByType[type].push(layerModel);
@@ -36,7 +36,7 @@ var Layers = Backbone.Collection.extend({
         }, {});
 
         var lastOrder = 1;
-        var sortedTypes = [TILED_LAYER_TYPE, RASTER_TILEO_LAYER_TYPE, TORQUE_LAYER_TYPE, CARTODB_LAYER_TYPE];
+        var sortedTypes = [TILED_LAYER_TYPE, TORQUE_LAYER_TYPE, CARTODB_LAYER_TYPE];
         _.each(sortedTypes, function (layerType) {
           var layers = layersByType[layerType] || [];
           _.each(layers, function (layerModel) {
