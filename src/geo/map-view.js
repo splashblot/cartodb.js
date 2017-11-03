@@ -262,7 +262,7 @@ var MapView = View.extend({
     var layerView = this._layerViews[layerModel.cid];
     if (layerView) {
       if (layerModel.get('type') === 'CartoDB' || layerModel.get('type') === 'tileo_raster') {
-        if (this.map.layers.getCartoDBLayers().length === 0) {
+        if (this.map.layers.getCartoAndRasterLayers().length === 0) {
           layerView.remove();
           this._cartoDBLayerGroupView = null;
         }
