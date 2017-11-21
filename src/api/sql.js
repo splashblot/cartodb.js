@@ -185,13 +185,26 @@ SQL.prototype.getBounds = function(sql, vars, options, callback) {
   if(_.isFunction(fn)) {
     callback = fn;
   }
-  var s = 'SELECT ST_XMin(ST_Extent(the_geom)) as minx,' +
-          '       ST_YMin(ST_Extent(the_geom)) as miny,'+
-          '       ST_XMax(ST_Extent(the_geom)) as maxx,' +
-          '       ST_YMax(ST_Extent(the_geom)) as maxy' +
-          ' from ({{{ sql }}}) as subq';
-  sql = Mustache.render(sql, vars);
-  this.execute(s, { sql: sql }, options)
+  var s = '';
+  if (sql.indexOf('raster') == -1) {
+    // query vector bounding box
+    s = 'SELECT ST_XMin(ST_Extent(the_geom)) as minx,' +
+            '       ST_YMin(ST_Extent(the_geom)) as miny,'+
+            '       ST_XMax(ST_Extent(the_geom)) as maxx,' +
+            '       ST_YMax(ST_Extent(the_geom)) as maxy' +
+            ' from ({{{ sql }}}) as subq';
+  } else {
+    // query raster bounding box
+    s = 'SELECT ST_AsGeoJSON(' +
+        '     ST_Transform(' +
+        '     ST_Envelope(' +
+        '     ST_Union(' +
+        '     ST_Envelope(the_raster_webmercator))),4236))' +
+        '     from' + sql.split('FROM')[1];
+        }
+
+    sql = Mustache.render(sql, vars);
+    this.execute(s, { sql: sql }, options)
     .done(function(result) {
       if (result.rows && result.rows.length > 0 && result.rows[0].maxx != null) {
         var c = result.rows[0];
@@ -211,12 +224,16 @@ SQL.prototype.getBounds = function(sql, vars, options, callback) {
 
         var bounds = [[lat0, lon0], [lat1, lon1]];
         promise.trigger('done', bounds);
-        callback && callback(null, bounds);
+      } else if (!!result.rows[0].st_asgeojson) {
+        // raster bounds
+        var coordinates = JSON.parse(result.rows[0].st_asgeojson).coordinates[0];
+        var bounds = [ [coordinates[2][1], coordinates[3][0]], [coordinates[0][1],coordinates[1][0]]]
+        promise.trigger('done', bounds);
       } else {
         var err = [NO_BOUNDS_ERROR_MESSAGE];
         promise.trigger('error', err);
-        callback && callback(err);
       }
+        callback && callback(err);
     })
     .error(function(err) {
       promise.trigger('error', err);
