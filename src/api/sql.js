@@ -227,7 +227,7 @@ SQL.prototype.getBounds = function(sql, vars, options, callback) {
       } else if (!!result.rows[0].st_asgeojson) {
         // raster bounds
         var coordinates = JSON.parse(result.rows[0].st_asgeojson).coordinates[0];
-        var bounds = [ [coordinates[2][1], coordinates[3][0]], [coordinates[0][1],coordinates[1][0]]]
+        var bounds = [[coordinates[0,1],coordinates[0,0]],[coordinates[2,1],coordinates[3,0]]];
         promise.trigger('done', bounds);
       } else {
         var err = [NO_BOUNDS_ERROR_MESSAGE];
