@@ -200,7 +200,7 @@ SQL.prototype.getBounds = function(sql, vars, options, callback) {
         '     ST_Envelope(' +
         '     ST_Union(' +
         '     ST_Envelope(the_raster_webmercator))),4236))' +
-        '     from' + sql;
+        '     from ' + sql;
         }
 
     sql = Mustache.render(sql, vars);
