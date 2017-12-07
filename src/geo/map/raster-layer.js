@@ -23,17 +23,17 @@ var RasterLayer = LayerModelBase.extend({
       this.set('initialStyle', attrs.cartocss);
     }
 
-    // Hopefully in the future (@apercas)
+    // Hopefully in the future (@apercas) => legends ✓
       // // PUBLIC PROPERTIES
       // this.infowindow = new InfowindowTemplate(attrs.infowindow);
       // this.tooltip = new TooltipTemplate(attrs.tooltip);
       // this.unset('infowindow');
       // this.unset('tooltip');
 
-      // this.legends = new Legends(attrs.legends, {
-      //   visModel: this._vis
-      // });
-      // this.unset('legends');
+      this.legends = new Legends(attrs.legends, {
+        visModel: this._vis
+      });
+      this.unset('legends');
 
       this.bind('change', this._onAttributeChanged, this);
       // this.infowindow.fields.bind('reset add remove', this._reloadVis, this);
