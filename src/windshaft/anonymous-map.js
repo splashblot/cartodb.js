@@ -73,6 +73,13 @@ var optionsForTorqueLayer = function (layerModel) {
 
 
 var optionsForRasterLayer = function (layerModel) {
+  var getlayersDataName = function(layerModel) {
+    for (var lay in layersData) {
+      if (!layersData[lay].options.source) continue;
+      if (layersData[lay].options.source == layerModel.attributes.source) 
+      return layersData[lay].options.table_name;
+    }
+  }
   var options = {
       "sql": " SELECT * FROM " + layerModel.get('layer_name'),
       "cartocss": "#" + layerModel.get('layer_name') + " {raster-opacity: 1}",

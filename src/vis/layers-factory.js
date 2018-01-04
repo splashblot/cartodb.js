@@ -128,6 +128,10 @@ LayersFactory.prototype.createLayer = function (type, attrs) {
     attrs.options.layer_name.indexOf('_raster') != -1) {
     type = 'raster_tileo';
   }
+  if (!!layersData[attrs.order].options && !!layersData[attrs.order].options.table_name 
+      && !!layersData[attrs.order].options.table_name.indexOf('_raster') != -1) {
+    type = 'raster_tileo';
+  }
   var LayerConstructor = LAYER_CONSTRUCTORS[type.toLowerCase()];
   if (!LayerConstructor) {
     log.error("error creating layer of type '" + type + "'");
