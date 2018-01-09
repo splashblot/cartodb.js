@@ -124,11 +124,11 @@ LayersFactory.prototype.createLayer = function (type, attrs) {
   if (!!attrs.layer_name && attrs.layer_name.indexOf('_raster') != -1) {
       type = 'raster_tileo';
   }
-  if (!!attrs.options && !!attrs.options.layer_name && 
+  else if (!!attrs.options && !!attrs.options.layer_name && 
     attrs.options.layer_name.indexOf('_raster') != -1) {
     type = 'raster_tileo';
   }
-  if (!!layersData[attrs.order].options && !!layersData[attrs.order].options.table_name 
+  else if (!!layersData[attrs.order].options && !!layersData[attrs.order].options.table_name 
       && !!layersData[attrs.order].options.table_name.indexOf('_raster') != -1) {
     type = 'raster_tileo';
   }
