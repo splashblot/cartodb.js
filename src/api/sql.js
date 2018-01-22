@@ -199,7 +199,7 @@ SQL.prototype.getBounds = function(sql, vars, options, callback) {
         '     ST_Transform(' +
         '     ST_Envelope(' +
         '     ST_Union(' +
-        '     ST_Envelope(the_raster_webmercator))),4236))' +
+        '     ST_Envelope(the_raster_webmercator))),4326))' +
         '     from ' + sql;
         }
 
