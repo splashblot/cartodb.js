@@ -39,25 +39,6 @@ var RasterLayer = LayerModelBase.extend({
       // this.infowindow.fields.bind('reset add remove', this._reloadVis, this);
       // this.tooltip.fields.bind('reset add remove', this._reloadVis, this);
 
-    // Pretty basic raster config
-    const RASTERCONFIG = {
-        "version": "1.3.1",
-        "layers": [
-            {
-                "type": "cartodb",
-                "options": {
-                    "sql": " SELECT * FROM " + attrs.layer_name,
-                    "cartocss": "#" + attrs.layer_name + " {raster-opacity: 1}",
-                    "cartocss_version": "2.3.0",
-                    "geom_column": "the_raster_webmercator",
-                    "geom_type": "raster"
-                }
-            }
-        ]
-    };
-    this.config = RASTERCONFIG;
-    this._newRasterLayer();
-
     LayerModelBase.prototype.initialize.apply(this, arguments);
   },
 
@@ -139,53 +120,6 @@ var RasterLayer = LayerModelBase.extend({
   getDataProvider: function () {
     return this._dataProvider;
   },
-
-  _newRasterLayer: function () {
-    const CURRENTURI = window.location;
-    var USER = '';
-    if (CURRENTURI.href.split('user/').length === 2) {
-      USER = CURRENTURI.href.split('user/')[1].split('/')[0];
-    } else if (CURRENTURI.href.split('/u/').length == 2) {
-      // organizations & domains mode
-      USER = CURRENTURI.href.split('/u/')[1].split('/')[0]
-    } else {
-      USER = CURRENTURI.href.split('//')[1].split('/')[0].split('.')[0];
-    }
-    const DOMAIN  = CURRENTURI.href.split('//')[1].split('/')[0];
-    const APIKEY  = this._vis.attributes.apiKey;
-    const APIURL  = CURRENTURI.protocol+ "//" + DOMAIN + "/user/" + USER + "/api/v1/map";
-    const SELF    = this;
-
-    function currentEndpoint() {
-      return APIURL;
-    }
-    function getourThis(){
-      return SELF;
-    }
-
-    //based on torque.js/lib/torque/provider/windshaft.js 
-    var request = new XMLHttpRequest();
-    request.open('POST', currentEndpoint() + "?api_key=" + APIKEY, true);
-    request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-    request.onload = function() {
-        if (this.status >= 200 && this.status < 400){
-            const DATA      = JSON.parse(this.response);
-            const SELF      = getourThis();
-            const ENDPOINT  = currentEndpoint() + "/" + DATA.layergroupid + "/{z}/{x}/{y}.png?api_key=" + APIKEY;
-            window.LayerGroupCollection[SELF.attributes.layer_name] = DATA.layergroupid;
-         
-            // store layergroupid on LayerGroupCollection but don't load the layer on the map yet
-            if (SELF.attributes.visible == false) return false;
-            rasterLayer = L.tileLayer(ENDPOINT, {
-                maxZoom: 18
-            }).addTo(SELF._vis.map);
-        } else {
-            throw 'Error calling server: Error ' + this.status + ' -> ' + this.response;
-        }
-    };
-    //request.send(JSON.stringify(this.config));
-
-  }
 });
 
 module.exports = RasterLayer;
