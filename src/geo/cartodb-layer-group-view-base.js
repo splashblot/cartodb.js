@@ -6,11 +6,15 @@ function CartoDBLayerGroupViewBase (layerGroupModel, nativeMap) {
   layerGroupModel.onLayerVisibilityChanged(this._reload.bind(this));
   /** dirty raster hack **/
   var layers = layerGroupModel._layersCollection.models;
+  var isRaster = function(layer) {
+    for (var lay in layersData) {
+      if (!layersData[lay].options.source) continue;
+      if (layersData[lay].options.source == layer.attributes.source)
+        return !!(layersData[lay].options.table_name.indexOf('_raster') != -1);
+    }
+  }
   for(ele in layers){
-    if ((layers[ele].attributes.layer_name && layers[ele].attributes.layer_name.indexOf('_raster') > 0) ||
-      (!!layersData[layers[ele].attributes.order].options && 
-       !!layersData[layers[ele].attributes.order].options.table_name && 
-         layersData[layers[ele].attributes.order].options.table_name.indexOf('_raster') != -1))
+    if (isRaster(layers[ele]))
       layers[ele].attributes.type = 'raster_tileo';
   }
 
