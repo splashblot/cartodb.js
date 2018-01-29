@@ -121,16 +121,15 @@ var LayersFactory = function (deps) {
 };
 
 LayersFactory.prototype.createLayer = function (type, attrs) {
-  if (!!attrs.layer_name && attrs.layer_name.indexOf('_raster') != -1) {
+  var isRaster = function(attrs) {
+    for (var lay in layersData) {
+      if (!layersData[lay].options.source) continue;
+      if (layersData[lay].options.source == attrs.options.source)
+        return !!(layersData[lay].options.table_name.indexOf('_raster') != -1);
+    }
+  }
+  if (isRaster(attrs)) {
       type = 'raster_tileo';
-  }
-  else if (!!attrs.options && !!attrs.options.layer_name && 
-    attrs.options.layer_name.indexOf('_raster') != -1) {
-    type = 'raster_tileo';
-  }
-  else if (!!layersData[attrs.order].options && !!layersData[attrs.order].options.table_name 
-      && layersData[attrs.order].options.table_name.indexOf('_raster') != -1) {
-    type = 'raster_tileo';
   }
   var LayerConstructor = LAYER_CONSTRUCTORS[type.toLowerCase()];
   if (!LayerConstructor) {
