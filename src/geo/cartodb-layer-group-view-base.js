@@ -9,7 +9,7 @@ function CartoDBLayerGroupViewBase (layerGroupModel, nativeMap) {
   var isRaster = function(layer) {
     for (var lay in layersData) {
       if (!layersData[lay].options.source) continue;
-      if (layersData[lay].options.source == attrs.attributes.source)
+      if (layersData[lay].options.source == layer.attributes.source)
         return !!(layersData[lay].options.table_name.indexOf('_raster') != -1);
     }
   }
