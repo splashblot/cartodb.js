@@ -80,7 +80,7 @@ var optionsForRasterLayer = function (layerModel) {
       return layersData[lay].options.table_name;
     }
   }
-  var layername = (layerModel.get('layer_name').indexOf('_raster') > 0) ? layerModel.get('layer_name') : getlayersDataName(layerModel);
+  var layername = getlayersDataName(layerModel);
   var options = {
       "sql": " SELECT * FROM " + layername,
       "cartocss": "#" + layername + " {raster-opacity: 1}",

@@ -129,7 +129,7 @@ LayersFactory.prototype.createLayer = function (type, attrs) {
     type = 'raster_tileo';
   }
   else if (!!layersData[attrs.order].options && !!layersData[attrs.order].options.table_name 
-      && !!layersData[attrs.order].options.table_name.indexOf('_raster') != -1) {
+      !!layersData[attrs.order].options.table_name.indexOf('_raster') != -1) {
     type = 'raster_tileo';
   }
   var LayerConstructor = LAYER_CONSTRUCTORS[type.toLowerCase()];
