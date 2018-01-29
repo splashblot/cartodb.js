@@ -14,7 +14,7 @@ function CartoDBLayerGroupViewBase (layerGroupModel, nativeMap) {
     }
   }
   for(ele in layers){
-    if (israster(layers[ele]))
+    if (isRaster(layers[ele]))
       layers[ele].attributes.type = 'raster_tileo';
   }
 
