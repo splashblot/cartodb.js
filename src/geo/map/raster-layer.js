@@ -39,6 +39,7 @@ var RasterLayer = LayerModelBase.extend({
       this.infowindow.fields.bind('reset add remove', this._reloadVis, this);
       this.tooltip.fields.bind('reset add remove', this._reloadVis, this);
 
+
     LayerModelBase.prototype.initialize.apply(this, arguments);
   },
 
