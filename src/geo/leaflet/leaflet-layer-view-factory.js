@@ -37,7 +37,6 @@ LeafletLayerViewFactory.prototype.createLayerView = function (layerModel, native
      layerModel.set('url',"http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png");
   }
   
-  layerModel.attributes.order = (layerModel.attributes.type == 'raster_tileo') ? 1 : layerModel.attributes.order;
   var layerType = layerModel.get('type').toLowerCase();
   var LayerViewClass = this._constructors[layerType];
 

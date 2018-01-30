@@ -124,7 +124,8 @@ LayersFactory.prototype.createLayer = function (type, attrs) {
   var isRaster = function(attrs) {
     for (var lay in layersData) {
       if (!layersData[lay].options.source) continue;
-      if (layersData[lay].options.source == attrs.options.source)
+      var src = !!attrs.source? attrs.source : attrs.options.source
+      if (layersData[lay].options.source == src)
         return !!(layersData[lay].options.table_name.indexOf('_raster') != -1);
     }
   }
