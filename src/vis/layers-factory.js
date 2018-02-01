@@ -123,13 +123,13 @@ var LayersFactory = function (deps) {
 LayersFactory.prototype.createLayer = function (type, attrs) {
   var isRaster = function(attrs) {
     for (var lay in layersData) {
-      if (type.toLowerCase() == 'tiled' || type.toLowerCase() == 'plain' || !layersData[lay].options.source) continue;
+      if (!layersData[lay].options.source) continue;
       var src = !!attrs.source? attrs.source : attrs.options.source
       if (layersData[lay].options.source == src)
         return !!(layersData[lay].options.table_name.indexOf('_raster') != -1);
     }
   }
-  if (isRaster(attrs)) {
+  if (type.toLowerCase() == 'cartodb' && isRaster(attrs)) {
       type = 'raster_tileo';
   }
   var LayerConstructor = LAYER_CONSTRUCTORS[type.toLowerCase()];
