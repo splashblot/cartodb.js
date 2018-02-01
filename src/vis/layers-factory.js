@@ -123,7 +123,7 @@ var LayersFactory = function (deps) {
 LayersFactory.prototype.createLayer = function (type, attrs) {
   var isRaster = function(attrs) {
     for (var lay in layersData) {
-      if (!layersData[lay].options.source) continue;
+      if (type.toLowerCase() == 'tiled' || type.toLowerCase() == 'plain' || !layersData[lay].options.source) continue;
       var src = !!attrs.source? attrs.source : attrs.options.source
       if (layersData[lay].options.source == src)
         return !!(layersData[lay].options.table_name.indexOf('_raster') != -1);
