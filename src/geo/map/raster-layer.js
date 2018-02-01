@@ -76,9 +76,21 @@ var RasterLayer = LayerModelBase.extend({
     return this.get('visible');
   },
 
-  getSourceId: function () {
+ getSourceId: function () {
     var source = this.getSource();
     return source && source.id;
+  },
+
+  getSource: function () {
+    return this.get('source');
+  },
+
+  setSource: function (newSource, options) {
+    if (this.getSource()) {
+      this.getSource().unmarkAsSourceOf(this);
+    }
+    newSource.markAsSourceOf(this);
+    this.set('source', newSource, options);
   },
 
   isInteractive: function () {
