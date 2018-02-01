@@ -1,6 +1,6 @@
+/* global L */
 var $ = require('jquery');
 var _ = require('underscore');
-var L = require('leaflet');
 var MapView = require('../map-view');
 var LeafletLayerViewFactory = require('./leaflet-layer-view-factory');
 
@@ -209,6 +209,14 @@ var LeafletMapView = MapView.extend({
         layerView.setZIndex(layerModel.get('order'));
       }
     }, this);
+  },
+
+  /**
+   * Pass a function to be executed once the map is ready.
+   */
+  onReady: function (callback) {
+    // A Leaflet maps is always ready
+    callback();
   },
 
   // return the current bounds of the map view

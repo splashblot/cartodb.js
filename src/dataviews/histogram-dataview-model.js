@@ -1,6 +1,6 @@
 var _ = require('underscore');
 var Backbone = require('backbone');
-var d3 = require('d3');
+var d3 = require('d3-array');
 var DataviewModelBase = require('./dataview-model-base');
 var HistogramDataModel = require('./histogram-dataview/histogram-data-model');
 var helper = require('./helpers/histogram-helper');
@@ -24,8 +24,11 @@ module.exports = DataviewModelBase.extend({
 
     if (_.isNumber(this.get('own_filter'))) {
       params.push('own_filter=' + this.get('own_filter'));
+      if (this.get('column_type') === 'number' && this.get('bins')) {
+        params.push('bins=' + this.get('bins'));
+      }
     } else {
-      var offset = this._getCurrentOffset();
+      var offset = this.getCurrentOffset();
 
       if (this.get('column_type') === 'number' && this.get('bins')) {
         params.push('bins=' + this.get('bins'));
@@ -37,14 +40,11 @@ module.exports = DataviewModelBase.extend({
       }
 
       // Start - End
-      var limits = this._totals.getCurrentStartEnd();
-      if (limits !== null) {
-        if (_.isNumber(limits.start)) {
-          params.push('start=' + limits.start);
-        }
-        if (_.isNumber(limits.end)) {
-          params.push('end=' + limits.end);
-        }
+      var start = this.get('start');
+      var end = this.get('end');
+      if (_.isFinite(start) && _.isFinite(end)) {
+        params.push('start=' + start);
+        params.push('end=' + end);
       }
     }
     return params;
@@ -69,7 +69,7 @@ module.exports = DataviewModelBase.extend({
     this._data = new Backbone.Collection(this.get('data'));
 
     if (attrs && (attrs.min || attrs.max)) {
-      this.filter.setRange(this.get('min'), this.get('max'));
+      this.filter && this.filter.setRange(this.get('min'), this.get('max'));
     }
   },
 
@@ -79,8 +79,10 @@ module.exports = DataviewModelBase.extend({
     this._updateURLBinding();
 
     // When original data gets fetched
-    this._totals.bind('change:data', this._onDataChanged, this);
-    this._totals.once('change:data', this._updateBindings, this);
+    this._totals.bind('loadModelCompleted', this._onTotalsDataFetched, this);
+    this._totals.once('loadModelCompleted', this._updateBindings, this);
+    this._totals.bind('error', this.setUnavailable, this);
+    this._totals.bind('error', this._onTotalsError, this);
 
     this.on('change:column', this._onColumnChanged, this);
     this.on('change:localTimezone', this._onLocalTimezoneChanged, this);
@@ -136,7 +138,9 @@ module.exports = DataviewModelBase.extend({
 
   parse: function (data) {
     var aggregation = data.aggregation || (this._totals && this._totals.get('aggregation'));
-    var numberOfBins = data.bins_count;
+    var numberOfBins = _.isFinite(data.bins_count)
+      ? data.bins_count
+      : this.get('bins');
     var width = data.bin_width;
     var start = this.get('column_type') === 'date' ? data.timestamp_start : data.bins_start;
 
@@ -162,7 +166,7 @@ module.exports = DataviewModelBase.extend({
     }, { silent: true });
 
     if (this.get('column_type') === 'date') {
-      parsedData.data = helper.fillTimestampBuckets(parsedData.data, start, aggregation, numberOfBins, this._getCurrentOffset(), 'filtered', this._totals.get('data').length);
+      parsedData.data = helper.fillTimestampBuckets(parsedData.data, start, aggregation, numberOfBins, 'filtered', this._totals.get('data').length);
       numberOfBins = parsedData.data.length;
     } else {
       helper.fillNumericBuckets(parsedData.data, start, width, numberOfBins);
@@ -206,7 +210,7 @@ module.exports = DataviewModelBase.extend({
     });
     this.set('aggregation', undefined, { silent: true });
 
-    this._reloadVisAndForceFetch();
+    this._reloadAndForceFetch();
   },
 
   _calculateTotalAmount: function (buckets) {
@@ -315,7 +319,7 @@ module.exports = DataviewModelBase.extend({
   },
 
   _onColumnTypeChanged: function () {
-    this.filter.set('column_type', this.get('column_type'));
+    this.filter && this.filter.set('column_type', this.get('column_type'));
   },
 
   _onChangeBinds: function () {
@@ -331,12 +335,13 @@ module.exports = DataviewModelBase.extend({
     this._totals.setUrl(this.get('url'));
   },
 
-  _onDataChanged: function (model) {
-    var range = model && _.isFunction(model.getCurrentStartEnd) ? model.getCurrentStartEnd() : null;
-    if (range !== null) {
+  _onTotalsDataFetched: function (data, model) {
+    var start = model.get('start');
+    var end = model.get('end');
+    if (_.isFinite(start) && _.isFinite(end)) {
       this.set({
-        start: range.start,
-        end: range.end
+        start: start,
+        end: end
       });
     }
 
@@ -391,10 +396,15 @@ module.exports = DataviewModelBase.extend({
 
   _resetFilter: function () {
     this.disableFilter();
-    this.filter.unsetRange();
+    this.filter && this.filter.unsetRange();
   },
 
-  _getCurrentOffset: function () {
+  _onTotalsError: function (model, error) {
+    var parsedError = error && this._parseError(error);
+    this._triggerStatusError(parsedError);
+  },
+
+  getCurrentOffset: function () {
     return this.get('localTimezone')
       ? this._localOffset
       : this.get('offset');

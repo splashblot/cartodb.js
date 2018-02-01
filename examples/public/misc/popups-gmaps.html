@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Pop-ups | CARTO</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600,700|Open+Sans:300,400,600" rel="stylesheet">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700' rel='stylesheet' type='text/css'>
+    <!-- Include Google Maps -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAORE5iCjgLb4sMcWfmyRJgtP9VwfOrbJM"></script>
+    <!-- Include CARTO.js -->
+    <script src="../../../dist/public/carto.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body, *{ margin: 0; padding: 0; }
+      #map {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        z-index: 0;
+      }
+      #controls {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 300px;
+        z-index: 2;
+        padding: 8px 12px;
+        background: white;
+        box-shadow: 0 0 16px rgba(0, 0, 0, 0.12);
+        border-radius: 4px;
+        color: #2E3C43;
+      }
+      #controls h2 {
+        font: 300 12px/16px 'Open Sans';
+        background: rgba(0, 0, 0, 0.64);
+        border-radius: 4px;
+        padding: 8px 12px;
+        color: #fff;
+      }
+      .actions {
+        display: flex;
+      }
+      .actions li {
+        list-style-type: none;
+        display: flex;
+        align-items: center;
+      }
+      .actions li input {
+        margin: 0 8px 0 0;
+      }
+      .actions li label {
+        font: 12px/16px 'Open Sans';
+        cursor: pointer;
+      }
+      .actions li {
+        margin-right: 12px;
+      }
+      .actions li:last-child {
+        margin-right: 0;
+      }
+      .actions li:hover {
+        cursor: pointer;
+      }
+      .popup-container {
+        padding: 8px 12px;
+        width: 180px;
+      }
+      .popup-container li {
+        list-style-type: none;
+        margin-bottom: 8px;
+      }
+      .popup-container li:last-child {
+        margin-bottom: 0;
+      }
+      .popup-container h2 {
+        font: 600 16px/22px 'Open Sans';
+        margin-bottom: 12px
+      }
+      .popup-container h3{
+        font: 400 10px/14px 'Open Sans';
+        color: #747D82;
+        text-transform: uppercase;
+      }
+      .popup-container h4{
+        font: 600 12px/16px 'Open Sans';
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="controls">
+      <ul class="actions">
+        <li onclick="setPopupsClick()">
+          <input type="radio" name="style" value="01" id="popup">
+          <label for="popup">Pop-ups on click</label>
+        </li>
+        <li onclick="setPopupsHover()">
+          <input type="radio" name="style" value="01" id="hover">
+          <label for="hover">Pop-ups on hover</label>
+        </li>
+      </ul>
+    </div>
+    <script>
+      const map = new google.maps.Map(document.getElementById('map'), {
+        center: {lat: 30, lng: 0},
+        zoom: 3
+      });
+      // Hide the map labels and geometry strokes
+      map.set('styles', [{
+        elementType: 'labels',
+        stylers: [{ visibility: 'off' }]
+      }, {
+        elementType: 'geometry.stroke',
+        stylers: [{ visibility: 'off' }]
+      }]);
+
+      const client = new carto.Client({
+        apiKey: 'YOUR_API_KEY',
+        username: 'cartojs-test'
+      });
+
+      const populatedPlacesSource = new carto.source.Dataset(`
+        ne_10m_populated_places_simple
+      `);
+      const populatedPlacesStyle = new carto.style.CartoCSS(`
+        #layer {
+          marker-width: 7;
+          marker-fill: #EE4D5A;
+          marker-line-color: #FFFFFF;
+        }
+      `);
+      const populatedPlacesLayer = new carto.layer.Layer(populatedPlacesSource, populatedPlacesStyle, {
+        featureOverColumns: ['name', 'pop_max', 'pop_min']
+      });
+
+      client.addLayer(populatedPlacesLayer);
+      map.overlayMapTypes.push(client.getGoogleMapsMapType(map));
+
+      const infowindow = new google.maps.InfoWindow();
+
+      function openPopup(featureEvent) {
+        infowindow.setPosition(featureEvent.latLng);
+        if (!infowindow.map) {
+          let content = '';
+          content += `<div class="popup-container">`;
+          if (featureEvent.data.name) {
+            content += `<h2>${featureEvent.data.name}</h2>`;
+          }
+          if (featureEvent.data.pop_max || featureEvent.data.pop_min) {
+            content += `<ul>`;
+            if (featureEvent.data.pop_max) {
+              content += `<li><h3>Max:</h3> <h4>${featureEvent.data.pop_max}</h4></li>`;
+            }
+            if (featureEvent.data.pop_min) {
+              content += `<li><h3>Min:</h3> <h4>${featureEvent.data.pop_min}<h4></li>`;
+            }
+            content += `</ul>`;
+          }
+          content += `</div>`;
+          infowindow.setContent(content);
+          infowindow.open(map);
+        }
+      }
+
+      function closePopup(featureEvent) {
+        infowindow.close();
+      }
+
+      function setPopupsClick() {
+        populatedPlacesLayer.off('featureOver');
+        populatedPlacesLayer.off('featureOut');
+        populatedPlacesLayer.on('featureClicked', openPopup);
+      }
+
+      function setPopupsHover() {
+        populatedPlacesLayer.off('featureClicked');
+        populatedPlacesLayer.on('featureOver', openPopup);
+        populatedPlacesLayer.on('featureOut', closePopup);
+      }
+    </script>
+  </body>
+</html>

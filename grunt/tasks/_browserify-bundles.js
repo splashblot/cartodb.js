@@ -10,17 +10,30 @@ module.exports = {
       'test/spec/ui/**/*',
       'test/spec/vis/**/*',
       'test/spec/windshaft/**/*',
+      'test/spec/windshaft-integration/**/*',
       'test/spec/analysis/**/*',
+      'test/spec/engine.spec.js',
 
       // not actually used anywhere in cartodb.js, only for editor?
       // TODO can be (re)moved?
       '!test/spec/ui/common/tabpane.spec.js'
     ],
-    dest: '<%= config.tmp %>/src-specs.js'
+    dest: '<%= tmp %>/src-specs.js',
+    options: {
+      require: [ 'camshaft-reference/versions/0.59.4/reference.json:./versions/0.59.4/reference.json' ]
+    }
   },
 
   cartodb: {
-    src: 'src/cartodb.js',
-    dest: '<%= config.dist %>/cartodb.uncompressed.js'
+    src:  [
+      'src/cartodb.js'
+    ],
+    exclude: [
+      'src/api/v4/'
+    ],
+    dest: '<%= dist %>/internal/cartodb.uncompressed.js',
+    options: {
+      require: [ 'camshaft-reference/versions/0.59.4/reference.json:./versions/0.59.4/reference.json' ]
+    }
   }
 };

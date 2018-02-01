@@ -1,58 +1,63 @@
+/* global L */
 var _ = require('underscore');
-var L = require('leaflet');
+var C = require('../../constants');
 var LeafletLayerView = require('./leaflet-layer-view');
 var CartoDBLayerGroupViewBase = require('../cartodb-layer-group-view-base');
-var wax = require('wax.cartodb.js');
-
+var zera = require('carto-zera');
 var EMPTY_GIF = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
 var findContainerPoint = function (map, o) {
-    var curleft = 0;
-    var curtop = 0;
-    var obj = map.getContainer();
+  var curleft = 0;
+  var curtop = 0;
+  var obj = map.getContainer();
 
-    var x, y;
-    if (o.e.changedTouches && o.e.changedTouches.length > 0) {
-      x = o.e.changedTouches[0].clientX + window.scrollX;
-      y = o.e.changedTouches[0].clientY + window.scrollY;
-    } else {
-      x = o.e.clientX;
-      y = o.e.clientY;
-    }
+  var x, y;
+  if (o.e.changedTouches && o.e.changedTouches.length > 0) {
+    x = o.e.changedTouches[0].clientX + window.scrollX;
+    y = o.e.changedTouches[0].clientY + window.scrollY;
+  } else {
+    x = o.e.clientX;
+    y = o.e.clientY;
+  }
 
-    // If the map is fixed at the top of the window, we can't use offsetParent
-    // cause there might be some scrolling that we need to take into account.
-    if (obj.offsetParent && obj.offsetTop > 0) {
-      do {
-        curleft += obj.offsetLeft;
-        curtop += obj.offsetTop;
-      } while (obj = obj.offsetParent);
-      var point = new L.Point(
-        x - curleft, y - curtop);
-    } else {
-      var rect = obj.getBoundingClientRect();
-      var scrollX = (window.scrollX || window.pageXOffset);
-      var scrollY = (window.scrollY || window.pageYOffset);
-      var point = new L.Point(
-        (o.e.clientX ? o.e.clientX : x) - rect.left - obj.clientLeft - scrollX,
-        (o.e.clientY ? o.e.clientY : y) - rect.top - obj.clientTop - scrollY);
-    }
+  // If the map is fixed at the top of the window, we can't use offsetParent
+  // cause there might be some scrolling that we need to take into account.
+  var point;
+  if (obj.offsetParent && obj.offsetTop > 0) {
+    do {
+      curleft += obj.offsetLeft;
+      curtop += obj.offsetTop;
+      obj = obj.offsetParent;
+    } while (obj);
+    point = new L.Point(
+      x - curleft, y - curtop);
+  } else {
+    var rect = obj.getBoundingClientRect();
+    var scrollX = (window.scrollX || window.pageXOffset);
+    var scrollY = (window.scrollY || window.pageYOffset);
+    point = new L.Point(
+      (o.e.clientX ? o.e.clientX : x) - rect.left - obj.clientLeft - scrollX,
+      (o.e.clientY ? o.e.clientY : y) - rect.top - obj.clientTop - scrollY);
+  }
 
-    return point;
+  return point;
 };
 
-var LeafletCartoDBLayerGroupView = function (layerModel, leafletMap) {
-  var self = this;
+var LeafletCartoDBLayerGroupView = function (layerModel, opts) {
   LeafletLayerView.apply(this, arguments);
-  CartoDBLayerGroupViewBase.call(this, layerModel, leafletMap);
+  CartoDBLayerGroupViewBase.apply(this, arguments);
 
-  this.leafletLayer.on('load', function (e) {
-    self.trigger('load');
-  });
+  this.leafletLayer.on('load', function () {
+    this.trigger('load');
+  }.bind(this));
 
-  this.leafletLayer.on('loading', function (e) {
-    self.trigger('loading');
-  });
+  this.leafletLayer.on('loading', function () {
+    this.trigger('loading');
+  }.bind(this));
+
+  this.leafletLayer.on('tileerror', function (layer) {
+    this.model.addError({ type: C.WINDSHAFT_ERRORS.TILE });
+  }.bind(this));
 };
 
 LeafletCartoDBLayerGroupView.prototype = _.extend(
@@ -60,13 +65,17 @@ LeafletCartoDBLayerGroupView.prototype = _.extend(
   LeafletLayerView.prototype,
   CartoDBLayerGroupViewBase.prototype,
   {
-    interactionClass: wax.leaf.interaction,
+    interactionClass: zera.Interactive,
 
-    _createLeafletLayer: function (layerModel) {
-      return new L.TileLayer(null, {
+    _createLeafletLayer: function () {
+      var tileLayer = new L.TileLayer(null, {
         opacity: 0.99,
         maxZoom: 30
       });
+      tileLayer._setUrl = function (url, noDraw) {
+        return L.TileLayer.prototype.setUrl.call(this, url, noDraw);
+      };
+      return tileLayer;
     },
 
     _reload: function () {
@@ -78,20 +87,20 @@ LeafletCartoDBLayerGroupView.prototype = _.extend(
       }
 
       if (subdomains) {
-        L.Util.setOptions(this.leafletLayer, {subdomains:subdomains});
+        L.Util.setOptions(this.leafletLayer, { subdomains: subdomains });
       }
 
-      this.leafletLayer.setUrl(tileURLTemplate);
+      this.leafletLayer._setUrl(tileURLTemplate);
 
       this._reloadInteraction();
     },
 
-    _manageOffEvents: function (nativeMap, waxEvent) {
-      this._onFeatureOut(waxEvent.layer);
+    _manageOffEvents: function (nativeMap, zeraEvent) {
+      this._onFeatureOut(zeraEvent.layer);
     },
 
-    _manageOnEvents: function (nativeMap, waxEvent) {
-      var containerPoint = findContainerPoint(nativeMap, waxEvent);
+    _manageOnEvents: function (nativeMap, zeraEvent) {
+      var containerPoint = findContainerPoint(nativeMap, zeraEvent);
 
       if (!containerPoint || isNaN(containerPoint.x) || isNaN(containerPoint.y)) {
         return false;
@@ -99,14 +108,14 @@ LeafletCartoDBLayerGroupView.prototype = _.extend(
 
       var latlng = nativeMap.containerPointToLatLng(containerPoint);
 
-      var eventType = waxEvent.e.type.toLowerCase();
+      var eventType = zeraEvent.e.type.toLowerCase();
 
       switch (eventType) {
         case 'mousemove':
-          this._onFeatureOver(latlng, containerPoint, waxEvent.data, waxEvent.layer);
+          this._onFeatureOver(latlng, containerPoint, zeraEvent.data, zeraEvent.layer);
           break;
         case 'click':
-          this._onFeatureClicked(latlng, containerPoint, waxEvent.data, waxEvent.layer);
+          this._onFeatureClicked(latlng, containerPoint, zeraEvent.data, zeraEvent.layer);
           break;
       }
     },
@@ -145,7 +154,7 @@ LeafletCartoDBLayerGroupView.prototype = _.extend(
           layerIndex: layerIndex
         });
       }
-    },
+    }
   }
 );
 

@@ -1,11 +1,11 @@
 module.exports = {
-  task: function (grunt, config) {
+  task: function () {
     return {
       fonts: {
         expand: true,
         cwd: 'node_modules/cartoassets/src/fonts/',
         src: [ '**/*.{eot,ttf,woff,svg}' ],
-        dest: '<%= config.dist %>/themes/fonts'
+        dest: '<%= dist %>/internal/themes/fonts'
       }
     };
   }

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Change style | CARTO</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600,700|Open+Sans:400,600" rel="stylesheet">
+    <!-- Include Google Maps -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAORE5iCjgLb4sMcWfmyRJgtP9VwfOrbJM"></script>
+    <!-- Include CARTO.js -->
+    <script src="../../../dist/public/carto.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body, *{ margin: 0; padding: 0; }
+      #map {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+      }
+      #controls {
+        position: absolute;
+        padding: 20px;
+        background: white;
+        top: 12px;
+        right: 12px;
+        box-shadow: 0 0 16px rgba(0, 0, 0, 0.12);
+        border-radius: 4px;
+        width: 200px;
+        color: #2E3C43;
+      }
+      #controls li {
+        list-style-type: none;
+        margin: 0 0 8px 0;
+        display: flex;
+        vertical-align: middle;
+      }
+      #controls li input {
+        margin: 0 8px 0 0;
+      }
+      #controls li label {
+        font: 12px/16px 'Open Sans';
+        cursor: pointer;
+      }
+      #controls li:last-child {
+        margin-bottom: 0;
+      }
+      #controls li:hover {
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="controls">
+      <ul>
+        <li onclick="setRed()">
+          <input type="radio" name="style" value="01" checked  id="red">
+          <label for="red">Red</label>
+        </li>
+        <li onclick="setGreen()">
+          <input type="radio" name="style" value="02" id="green">
+          <label for="green">Green</label>
+        </li>
+        <li onclick="setBlue()">
+          <input type="radio" name="style" value="03" id="blue">
+          <label for="blue">Blue</label>
+        </li>
+      </ul>
+    </div>
+    <script>
+      const map = new google.maps.Map(document.getElementById('map'), {
+        center: {lat: 30, lng: 0},
+        zoom: 3
+      });
+      // Hide the map labels and geometry strokes
+      map.set('styles', [{
+        elementType: 'labels',
+        stylers: [{ visibility: 'off' }]
+      }, {
+        elementType: 'geometry.stroke',
+        stylers: [{ visibility: 'off' }]
+      }]);
+
+      const client = new carto.Client({
+        apiKey: 'YOUR_API_KEY',
+        username: 'cartojs-test'
+      });
+
+      const source = new carto.source.Dataset(`
+        ne_10m_populated_places_simple
+      `);
+      const style = new carto.style.CartoCSS(`
+        #layer {
+          marker-width: 7;
+          marker-fill: #EE4D5A;
+          marker-line-color: #FFFFFF;
+        }
+      `);
+      const layer = new carto.layer.Layer(source, style);
+
+      client.addLayer(layer);
+      map.overlayMapTypes.push(client.getGoogleMapsMapType(map));
+
+      function setRed() {
+        style.setContent(`
+          #layer {
+            marker-width: 7;
+            marker-fill: #EE4D5A;
+            marker-line-color: #FFFFFF;
+          }
+        `);
+      }
+
+      function setGreen() {
+        style.setContent(`
+          #layer {
+            marker-width: 7;
+            marker-fill: #9BC63B;
+            marker-line-color: #FFFFFF;
+          }
+        `);
+      }
+
+      function setBlue() {
+        style.setContent(`
+          #layer {
+            marker-width: 9;
+            marker-fill: #1785FB;
+            marker-line-color: #FFFFFF;
+          }
+        `);
+      }
+    </script>
+  </body>
+</html>
