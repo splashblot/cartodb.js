@@ -129,7 +129,7 @@ LayersFactory.prototype.createLayer = function (type, attrs) {
         return !!(layersData[lay].options.table_name.indexOf('_raster') != -1);
     }
   }
-  if (type.toLowerCase() == 'cartodb' && isRaster(attrs)) {
+  if (attrs.type.toLowerCase() == 'cartodb' && isRaster(attrs)) {
       type = 'raster_tileo';
   }
   var LayerConstructor = LAYER_CONSTRUCTORS[type.toLowerCase()];
