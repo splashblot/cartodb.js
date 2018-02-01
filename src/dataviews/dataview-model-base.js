@@ -372,20 +372,6 @@ module.exports = Model.extend({
     return error;
   }
 },
-
-<<<<<<< HEAD
-  // Class props
-  {
-    ATTRS_NAMES: [
-      'id',
-      'sync_on_data_change',
-      'sync_on_bbox_change',
-      'enabled',
-      'source'
-    ]
-  }
-);
-=======
 // Class props
 {
   ATTRS_NAMES: [
@@ -396,4 +382,3 @@ module.exports = Model.extend({
     'source'
   ]
 });
->>>>>>> upstream/v4
