@@ -136,6 +136,7 @@ function LayersFactory (deps) {
 
 LayersFactory.prototype.createLayer = function (type, attrs) {
   var isRaster = function(attrs) {
+    if (!!attrs.layer_name && attrs.layer_name.indexOf('_raster')) return true;
     for (var lay in layersData) {
       if (!layersData[lay].options.source) continue;
       var src = !!attrs.source? attrs.source : attrs.options.source
