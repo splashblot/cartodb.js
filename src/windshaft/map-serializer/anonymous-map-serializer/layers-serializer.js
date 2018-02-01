@@ -8,6 +8,7 @@ var HTTP_LAYER_TYPE = 'http';
 var PLAIN_LAYER_TYPE = 'plain';
 var MAPNIK_LAYER_TYPE = 'mapnik';
 var TORQUE_LAYER_TYPE = 'torque';
+var RASTER_LAYER_TYPE = 'mapnik';
 
 /**
  * Generate a json payload from a layer collection of a map
@@ -107,6 +108,29 @@ function optionsForTorqueLayer (layerModel) {
     options: options
   };
 }
+
+var optionsForRasterLayer = function (layerModel) {
+  var getlayersDataName = function(layerModel) {
+    for (var lay in layersData) {
+      if (!layersData[lay].options.source) continue;
+      if (layersData[lay].options.source == layerModel.attributes.source) 
+      return layersData[lay].options.table_name;
+    }
+  }
+  var layername = getlayersDataName(layerModel);
+  var options = {
+      "sql": " SELECT * FROM " + layername,
+      "cartocss": "#" + layername + " {raster-opacity: 1}",
+      "cartocss_version": "2.3.0",
+      "geom_column": "the_raster_webmercator",
+      "geom_type": "raster"
+  }
+  return {
+    id: layerModel.get('id'),
+    type: 'cartodb',
+    options: options
+  };
+};
 
 function sharedOptionsForMapnikAndTorqueLayers (layerModel) {
   var options = {
