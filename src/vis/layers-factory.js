@@ -93,9 +93,7 @@ var LAYER_CONSTRUCTORS = {
   },
 
   raster_tileo: function(data, options) {
-    return new RasterLayer(data, {
-      vis: options.vis
-    });
+    return new RasterLayer(data, {   engine: options.engine });
   },
 
   torque: function (attrs, options) {

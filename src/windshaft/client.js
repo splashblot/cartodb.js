@@ -50,7 +50,7 @@ WindshaftClient.prototype.instantiateMap = function (request) {
     this._performRequest(request, {
       success: function (response) {
         this._requestTracker.track(request, response);
-        if (response.errors) {
+        if (response.errors && response.errors[0].indexOf('_raster') == -1) {
           var parsedErrors = parseWindshaftErrors(response);
           request.options.error && request.options.error(parsedErrors);
         } else {

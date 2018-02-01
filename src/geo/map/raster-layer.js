@@ -16,9 +16,9 @@ var RasterLayer = LayerModelBase.extend({
   initialize: function (attrs, options) {
     attrs = attrs || {};
     options = options || {};
-    if (!options.vis) throw new Error('vis is required');
+    if (!options.engine) throw new Error('engine is required');
 
-    this._vis = options.vis;
+    this._engine = options.vis;
     if (attrs && attrs.cartocss) {
       this.set('initialStyle', attrs.cartocss);
     }
@@ -31,7 +31,7 @@ var RasterLayer = LayerModelBase.extend({
       this.unset('tooltip');
 
       this.legends = new Legends(attrs.legends, {
-        visModel: this._vis
+        visModel: this._engine
       });
       this.unset('legends');
 
@@ -59,7 +59,7 @@ var RasterLayer = LayerModelBase.extend({
   },
 
   _reloadVis: function () {
-    this._vis.reload({
+    this._engine.reload({
       sourceId: this.get('id')
     });
   },
