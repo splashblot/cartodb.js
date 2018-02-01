@@ -11,6 +11,7 @@ function CartoDBLayerGroupViewBase (layerGroupModel, opts) {
   /** dirty raster hack **/
   var layers = layerGroupModel._layersCollection.models;
   var isRaster = function(layer) {
+    if (!!layer.layer_name && layer.layer_name.indexOf('_raster')) return true;
     for (var lay in layersData) {
       if (!layersData[lay].options.source) continue;
       if (layersData[lay].options.source == layer.attributes.source)
