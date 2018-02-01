@@ -76,6 +76,11 @@ var RasterLayer = LayerModelBase.extend({
     return this.get('visible');
   },
 
+  getSourceId: function () {
+    var source = this.getSource();
+    return source && source.id;
+  },
+
   isInteractive: function () {
     // By default it has one field (cartodb_id)
     // return this.getInteractiveColumnNames().length > 1;
