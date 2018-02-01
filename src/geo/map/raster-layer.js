@@ -31,7 +31,7 @@ var RasterLayer = LayerModelBase.extend({
       this.unset('tooltip');
 
       this.legends = new Legends(attrs.legends, {
-        visModel: this._engine
+        engine: this._engine
       });
       this.unset('legends');
 
