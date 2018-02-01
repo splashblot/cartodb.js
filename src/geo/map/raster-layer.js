@@ -22,6 +22,10 @@ var RasterLayer = LayerModelBase.extend({
     if (attrs && attrs.cartocss) {
       this.set('initialStyle', attrs.cartocss);
     }
+    
+    if (attrs.source) {
+      this.setSource(attrs.source);
+    }
 
     // Hopefully in the future (@apercas) => legends ✓
       // PUBLIC PROPERTIES
