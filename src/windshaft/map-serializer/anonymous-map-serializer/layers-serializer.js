@@ -31,7 +31,10 @@ function _calculateLayerJSON (layerModel) {
     return optionsForMapnikLayer(layerModel);
   } else if (LayerTypes.isTorqueLayer(layerModel)) {
     return optionsForTorqueLayer(layerModel);
+  } else if (LayerTypes.isRasterLayer(layerModel)) {
+    return optionsForRasterLayer(layerModel);
   }
+
 }
 
 function optionsForHTTPLayer (layerModel) {
