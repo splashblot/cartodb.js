@@ -18,7 +18,7 @@ var RasterLayer = LayerModelBase.extend({
     options = options || {};
     if (!options.engine) throw new Error('engine is required');
 
-    this._engine = options.vis;
+    this._engine = options.engine;
     if (attrs && attrs.cartocss) {
       this.set('initialStyle', attrs.cartocss);
     }
