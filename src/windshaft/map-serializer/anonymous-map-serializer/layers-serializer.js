@@ -116,7 +116,7 @@ var optionsForRasterLayer = function (layerModel) {
   var getlayersDataName = function(layerModel) {
     for (var lay in layersData) {
       if (!layersData[lay].options.source) continue;
-      if (layersData[lay].options.source == layerModel.attributes.source) 
+      if (layersData[lay].options.source == layerModel.attributes.source.id) 
       return layersData[lay].options.table_name;
     }
   }

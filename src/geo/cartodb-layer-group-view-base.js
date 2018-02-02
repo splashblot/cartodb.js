@@ -14,12 +14,12 @@ function CartoDBLayerGroupViewBase (layerGroupModel, opts) {
     if (!!layer.attributes.layer_name && layer.attributes.layer_name.indexOf('_raster') > 0) return true;
     for (var lay in layersData) {
       if (!layersData[lay].options.source) continue;
-      if (layersData[lay].options.source == layer.attributes.source)
+      if (layersData[lay].options.source == layer.attributes.source.id)
         return !!(layersData[lay].options.table_name.indexOf('_raster') != -1);
     }
   }
   for(ele in layers){
-    if (isRaster(layers[ele]))
+    if (layers[ele].attributes.type.toLowerCase() == 'cartodb' && isRaster(layers[ele]))
       layers[ele].attributes.type = 'raster_tileo';
   }
 

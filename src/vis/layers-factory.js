@@ -139,7 +139,7 @@ LayersFactory.prototype.createLayer = function (type, attrs) {
     if (!!attrs.layer_name && attrs.layer_name.indexOf('_raster') != -1)  return true;
     for (var lay in layersData) {
       if (!layersData[lay].options.source) continue;
-      var src = !!attrs.source? attrs.source : attrs.options.source
+      var src = !!attrs.source? attrs.source : attrs.options.source.id
       if (layersData[lay].options.source == src)
         return !!(layersData[lay].options.table_name.indexOf('_raster') != -1);
     }
