@@ -114,10 +114,14 @@ function optionsForTorqueLayer (layerModel) {
 
 var optionsForRasterLayer = function (layerModel) {
   var getlayersDataName = function(layerModel) {
+    // retrieve name from source on an already existent layer
+    // fallbacks to given name if there's no layer as such on layersData
     for (var lay in layersData) {
       if (!layersData[lay].options.source) continue;
       if (layersData[lay].options.source == layerModel.attributes.source.id) 
-      return layersData[lay].options.table_name;
+        return layersData[lay].options.table_name;
+      else
+        return layerModel.attributes.layer_name;
     }
   }
   var layername = getlayersDataName(layerModel);
