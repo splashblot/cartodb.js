@@ -1,40 +1,39 @@
+/* global L */
 var _ = require('underscore');
-var L = require('leaflet');
 var LeafletLayerView = require('./leaflet-layer-view.js');
 
 var generateLeafletLayerOptions = function (layerModel) {
   return {
-    attribution:  layerModel.get('attribution'),
-    layers:       layerModel.get('layers'),
-    format:       layerModel.get('format'),
-    transparent:  layerModel.get('transparent'),
-    minZoom:      layerModel.get('minZomm'),
-    maxZoom:      layerModel.get('maxZoom'),
-    subdomains:   layerModel.get('subdomains') || 'abc',
+    attribution: layerModel.get('attribution'),
+    layers: layerModel.get('layers'),
+    format: layerModel.get('format'),
+    transparent: layerModel.get('transparent'),
+    minZoom: layerModel.get('minZomm'),
+    maxZoom: layerModel.get('maxZoom'),
+    subdomains: layerModel.get('subdomains') || 'abc',
     errorTileUrl: layerModel.get('errorTileUrl'),
-    opacity:      layerModel.get('opacity')
+    opacity: layerModel.get('opacity')
   };
 };
 
-var LeafletWMSLayerView = function (layerModel, leafletMap) {
-  var self = this;
+var LeafletWMSLayerView = function (layerModel, opts) {
   LeafletLayerView.apply(this, arguments);
 
   this.leafletLayer.on('load', function (e) {
-    self.trigger('load');
-  });
+    this.trigger('load');
+  }.bind(this));
 
   this.leafletLayer.on('loading', function (e) {
-    self.trigger('loading');
-  });
-}
+    this.trigger('loading');
+  }.bind(this));
+};
 
 LeafletWMSLayerView.prototype = _.extend(
   {},
   LeafletLayerView.prototype,
   {
-    _createLeafletLayer: function (layerModel) {
-      return new L.TileLayer.WMS(layerModel.get('urlTemplate'), generateLeafletLayerOptions(layerModel));
+    _createLeafletLayer: function () {
+      return new L.TileLayer.WMS(this.model.get('urlTemplate'), generateLeafletLayerOptions(this.model));
     },
 
     _modelUpdated: function () {

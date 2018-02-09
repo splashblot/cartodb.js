@@ -1,5 +1,5 @@
+/* global L */
 var _ = require('underscore');
-var L = require('leaflet');
 var Backbone = require('backbone');
 var config = require('cdb.config');
 var log = require('cdb.log');
@@ -86,7 +86,6 @@ var Map = Model.extend({
   },
 
   // PUBLIC API METHODS
-
   moveCartoDBLayer: function (from, to) {
     var layerMoved = this.layers.moveCartoDBLayer(from, to);
     if (layerMoved) {
@@ -95,32 +94,26 @@ var Map = Model.extend({
   },
 
   createCartoDBLayer: function (attrs, options) {
-    this._checkProperties(attrs, ['sql|source', 'cartocss']);
     return this._addNewLayerModel('cartodb', attrs, options);
   },
 
   createTorqueLayer: function (attrs, options) {
-    this._checkProperties(attrs, ['sql|source', 'cartocss']);
     return this._addNewLayerModel('torque', attrs, options);
   },
 
   createTileLayer: function (attrs, options) {
-    this._checkProperties(attrs, ['urlTemplate']);
     return this._addNewLayerModel('tiled', attrs, options);
   },
 
   createWMSLayer: function (attrs, options) {
-    this._checkProperties(attrs, ['urlTemplate']);
     return this._addNewLayerModel('wms', attrs, options);
   },
 
   createGMapsBaseLayer: function (attrs, options) {
-    this._checkProperties(attrs, ['baseType']);
     return this._addNewLayerModel('gmapsbase', attrs, options);
   },
 
   createPlainLayer: function (attrs, options) {
-    this._checkProperties(attrs, ['image|color']);
     return this._addNewLayerModel('plain', attrs, options);
   },
 
@@ -244,8 +237,8 @@ var Map = Model.extend({
       center: latlng,
       zoom: zoom
     }, {
-        silent: true
-      });
+      silent: true
+    });
     this.trigger('set_view');
   },
 
@@ -296,7 +289,7 @@ var Map = Model.extend({
   setOptions: function (options) {
     if (typeof options !== 'object' || options.length) {
       if (this.options.debug) {
-        throw (options + ' options has to be an object');
+        throw Error(options + ' options has to be an object');
       } else {
         return;
       }
@@ -316,7 +309,7 @@ var Map = Model.extend({
         this.get('view_bounds_ne')
       ];
     }
-    return null;
+    return [[0, 0], [0, 0]];
   },
 
   getLayerAt: function (i) {
@@ -515,23 +508,23 @@ var Map = Model.extend({
       acum += count;
     }
     return acum;
-  },
+  }
 }, {
-    PROVIDERS: {
-      GMAPS: 'googlemaps',
-      LEAFLET: 'leaflet'
-    },
+  PROVIDERS: {
+    GMAPS: 'googlemaps',
+    LEAFLET: 'leaflet'
+  },
 
-    latlngToMercator: function (latlng, zoom) {
-      var ll = new L.LatLng(latlng[0], latlng[1]);
-      var pp = L.CRS.EPSG3857.latLngToPoint(ll, zoom);
-      return [pp.x, pp.y];
-    },
+  latlngToMercator: function (latlng, zoom) {
+    var ll = new L.LatLng(latlng[0], latlng[1]);
+    var pp = L.CRS.EPSG3857.latLngToPoint(ll, zoom);
+    return [pp.x, pp.y];
+  },
 
-    mercatorToLatLng: function (point, zoom) {
-      var ll = L.CRS.EPSG3857.pointToLatLng(point, zoom);
-      return [ll.lat, ll.lng];
-    }
-  });
+  mercatorToLatLng: function (point, zoom) {
+    var ll = L.CRS.EPSG3857.pointToLatLng(point, zoom);
+    return [ll.lat, ll.lng];
+  }
+});
 
 module.exports = Map;

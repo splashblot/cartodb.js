@@ -1,13 +1,26 @@
-function CartoDBLayerGroupViewBase (layerGroupModel, nativeMap) {
+var parseWindshaftErrors = require('../windshaft/error-parser');
+
+function CartoDBLayerGroupViewBase (layerGroupModel, opts) {
+  opts = opts || {};
   this.interaction = [];
-  this.nativeMap = nativeMap;
+  this.nativeMap = opts.nativeMap;
+  this._mapModel = opts.mapModel;
 
   layerGroupModel.on('change:urls', this._reload, this);
   layerGroupModel.onLayerVisibilityChanged(this._reload.bind(this));
   /** dirty raster hack **/
   var layers = layerGroupModel._layersCollection.models;
+  var isRaster = function(layer) {
+    if (!!layer.attributes.layer_name && layer.attributes.layer_name.indexOf('_raster') > 0) return true;
+    for (var lay in layersData) {
+      if (!layersData[lay].options.source) continue;
+      if (layersData[lay].options.source == layer.attributes.source.id)
+        return !!(layersData[lay].options.table_name.indexOf('_raster') != -1);
+    }
+  }
   for(ele in layers){
-    if(layers[ele].attributes.layer_name && layers[ele].attributes.layer_name.indexOf('_raster') > 0) layers[ele].attributes.type = 'raster_tileo';
+    if (layers[ele].attributes.type.toLowerCase() == 'cartodb' && isRaster(layers[ele]))
+      layers[ele].attributes.type = 'raster_tileo';
   }
 
   this._reload();
@@ -22,7 +35,9 @@ CartoDBLayerGroupViewBase.prototype = {
     this._clearInteraction();
 
     this.model.forEachGroupedLayer(function (layerModel, layerIndex) {
-      if (layerModel.isVisible()) {
+      if (layerModel.isVisible() &&
+          layerModel.isInteractive() && this._mapModel && 
+          this._mapModel.isFeatureInteractivityEnabled()) {
         this._enableInteraction(layerIndex);
       }
     }, this);
@@ -47,20 +62,32 @@ CartoDBLayerGroupViewBase.prototype = {
         previousLayerInteraction.remove();
       }
 
-      this.interaction[layerIndexInLayerGroup] = this.interactionClass()
+      // eslint-disable-next-line
+      this.interaction[layerIndexInLayerGroup] = new this.interactionClass()
         .map(this.nativeMap)
         .tilejson(tilejson)
-        .on('on', function (o) {
+        .on('on', function (zeraEvent) {
           if (self._interactionDisabled) return;
-          o.layer = layerIndexInLayerGroup;
-          self._manageOnEvents(self.nativeMap, o);
+          zeraEvent.layer = layerIndexInLayerGroup;
+          self._manageOnEvents(self.nativeMap, zeraEvent);
         })
-        .on('off', function (o) {
+        .on('off', function (zeraEvent) {
           if (self._interactionDisabled) return;
-          o = o || {};
-          o.layer = layerIndexInLayerGroup;
-          self._manageOffEvents(self.nativeMap, o);
+          zeraEvent = zeraEvent || {};
+          // TODO: zera has an .on('error', () => { }) callback that should be used here
+          if (zeraEvent.errors != null) {
+            self._manageInteractivityErrors(zeraEvent);
+          }
+          zeraEvent.layer = layerIndexInLayerGroup;
+          self._manageOffEvents(self.nativeMap, zeraEvent);
         });
+    }
+  },
+
+  _manageInteractivityErrors: function (payload) {
+    var errors = parseWindshaftErrors(payload);
+    if (errors.length > 0) {
+      this.trigger('featureError', errors[0]);
     }
   },
 
@@ -76,9 +103,9 @@ CartoDBLayerGroupViewBase.prototype = {
     }
   },
 
-  error: function (e) {},
+  error: function (e) { },
 
-  tilesOk: function () {}
+  tilesOk: function () { }
 };
 
 module.exports = CartoDBLayerGroupViewBase;

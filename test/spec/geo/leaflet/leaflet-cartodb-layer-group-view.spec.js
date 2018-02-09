@@ -1,41 +1,50 @@
-var _ = require('underscore');
-var L = require('leaflet');
+/* global L */
+var cartoLayerGroupViewTests = require('../shared-tests-for-carto-layer-group');
+var LeafletCartoDBLayerGroupView = require('../../../../src/geo/leaflet/leaflet-cartodb-layer-group-view');
 
-var SharedTestsForCartoDBLayerGroupViews = require('../shared-tests-for-cartodb-layer-group-views');
-var FakeWax = require('../fake-wax');
-
-var OriginalLeafletCartoDBLayerGroupView = require('../../../../src/geo/leaflet/leaflet-cartodb-layer-group-view');
-
-var LeafletCartoDBLayerGroupView = OriginalLeafletCartoDBLayerGroupView;
-
-LeafletCartoDBLayerGroupView.prototype = _.extend(
-  {},
-  OriginalLeafletCartoDBLayerGroupView.prototype,
-  {
-    interactionClass: FakeWax
+describe('leaflet-cartodb-layer-group-view', function () {
+  /**
+   * Helper function used to get a map in the shared tests.
+   */
+  function createNativeMap (container) {
+    // Create a leaflet map inside a container
+    container.setAttribute('id', 'map');
+    container.style.height = '200px';
+    document.body.appendChild(container);
+    return L.map('map').setView([47.84808037632246, 14.2822265625], 4);
   }
-);
 
-var expectTileURLTemplateToMatch = function (layerGroupView, expectedTileURLTemplate) {
-  expect(layerGroupView.leafletLayer._url).toEqual(expectedTileURLTemplate);
-};
+  /**
+   * Helper function used to get the tiles in the shared tests
+   */
+  function getTileUrl (layerGroupView) {
+    return layerGroupView.leafletLayer._url.replace('{s}', '0');
+  }
 
-var createLayerGroupView = function (layerGroupModel, container) {
-  var leafletMap = new L.Map(container, {
-    center: [0, 0],
-    zoom: 3
-  });
+  /**
+   * Gmaps events and Leaflet events are different.
+   */
+  var event = {
+    containerPoint: { x: 264, y: 309 },
+    data: {
+      name: 'fakeCityName',
+      cartodb_id: 123
+    },
+    e: {
+      clientX: 696,
+      clientY: 325,
+      type: 'mousemove'
+    },
+    latlng: {
+      lat: 42.293564192170095,
+      lng: -8.173828125000002
+    },
+    layer: 0,
+    layerPoint: { x: 264, y: 309 },
+    originalEvent: {},
+    target: {},
+    type: 'mouseMove'
+  };
 
-  var layerGroupView = new LeafletCartoDBLayerGroupView(layerGroupModel, leafletMap);
-  layerGroupView.leafletLayer.addTo(leafletMap);
-  return layerGroupView;
-};
-
-var fireNativeEvent = function (layerGroupView, eventName) {
-  layerGroupView.leafletLayer.fire(eventName);
-};
-
-describe('src/geo/leaflet/leaflet-cartodb-layer-group-view.js', function () {
-  SharedTestsForCartoDBLayerGroupViews.call(this, createLayerGroupView, expectTileURLTemplateToMatch, fireNativeEvent);
+  cartoLayerGroupViewTests(createNativeMap, LeafletCartoDBLayerGroupView, getTileUrl, event);
 });
-

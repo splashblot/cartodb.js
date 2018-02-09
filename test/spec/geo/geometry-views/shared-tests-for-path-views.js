@@ -85,7 +85,7 @@ module.exports = function (Path, MapView, PathView) {
         this.geometry.addPoint(point);
       });
 
-      it("should update the path's latlng", function () {
+      it('should update the path\'s latlng', function () {
         expect(this.geometry.getCoordinates()).toEqual([
           [ -40, 40 ], [ -1, 1 ], [ 1, 2 ], [ 3, 4 ]
         ]);
@@ -95,6 +95,32 @@ module.exports = function (Path, MapView, PathView) {
         var numberOfMarkersAfter = this.mapView.getMarkers().length;
 
         expect(numberOfMarkersAfter).toEqual(this.numberOfMarkersBefore + 1);
+      });
+    });
+
+    describe('when the point triggers a dblclick event', function () {
+      beforeEach(function () {
+        this.geometry.setCoordinates([
+          [ -10, 10 ], [ 10, 20 ], [ 30, 40 ]
+        ]);
+      });
+
+      it('should remove the geometry point', function () {
+        var pointToDelete = new Point({
+          latlng: [ -40, 40 ]
+        });
+
+        this.geometry.addPoint(pointToDelete);
+
+        expect(this.geometry.getCoordinates()).toEqual([
+          [-40, 40], [ -10, 10 ], [ 10, 20 ], [ 30, 40 ]
+        ]);
+
+        pointToDelete.trigger('dblclick');
+
+        expect(this.geometry.getCoordinates()).toEqual([
+          [ -10, 10 ], [ 10, 20 ], [ 30, 40 ]
+        ]);
       });
     });
 
@@ -143,7 +169,7 @@ module.exports = function (Path, MapView, PathView) {
   });
 
   describe('expandable paths', function () {
-    beforeEach(function () {
+    beforeEach(function (done) {
       this.mapView = createMapView(MapView);
       this.mapView.render();
 
@@ -161,12 +187,17 @@ module.exports = function (Path, MapView, PathView) {
         mapView: this.mapView
       });
 
-      this.geometryView.render();
+      // Listen for the map to be ready
+      this.mapView.onReady(function () {
+        this.geometryView.render();
 
-      // Marker that we'll interact with in the tests
-      this.middlePointMarker = this.mapView.findMarkerByLatLng({ lat: 5, lng: 0 });
-      var markers = this.mapView.getMarkers();
-      this.numberOfMarkersBefore = markers.length;
+        // Marker that we'll interact with in the tests
+        this.middlePointMarker = this.mapView.findMarkerByLatLng({ lat: 5, lng: 0 });
+        var markers = this.mapView.getMarkers();
+        this.numberOfMarkersBefore = markers.length;
+
+        done();
+      }.bind(this));
     });
 
     describe('when the model is removed', function () {
@@ -251,6 +282,16 @@ module.exports = function (Path, MapView, PathView) {
 
           expect(this.mapView.findMarkerByLatLng({ lat: 2.5, lng: -2.5 })).toBeDefined();
           expect(this.mapView.findMarkerByLatLng({ lat: 7.5, lng: -2.5 })).toBeDefined();
+        });
+
+        it('should delete the new point after dblclick event', function () {
+          this.middlePointMarker.trigger('mousedown');
+          this.middlePointMarker.trigger('dblclick');
+          var paths = this.mapView.getPaths();
+
+          expect(paths[0].getCoordinates()).toEqual([
+            { lat: 0, lng: 0 }, { lat: 10, lng: 0 }, { lat: 10, lng: 10 }, { lat: 0, lng: 10 }
+          ]);
         });
       });
     });

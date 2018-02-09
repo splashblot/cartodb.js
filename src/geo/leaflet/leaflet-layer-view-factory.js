@@ -5,20 +5,17 @@ var LeafletPlainLayerView = require('./leaflet-plain-layer-view');
 var LeafletCartoDBLayerGroupView = require('./leaflet-cartodb-layer-group-view');
 var LeafletTorqueLayerView = require('./leaflet-torque-layer-view');
 var LeafletRasterTileoLayerView = require('./leaflet-raster-tileo-layer-view');
-var LeafletCartoDBWebglLayerGroupView = require('./leaflet-cartodb-webgl-layer-group-view');
+var RenderModes = require('../../geo/render-modes');
 
-var LayerGroupViewConstructor = function (layerGroupModel, mapModel, options) {
-  if (options.vector) {
-    return new LeafletCartoDBWebglLayerGroupView(layerGroupModel, mapModel);
+var LayerGroupViewConstructor = function (layerGroupModel, opts) {
+  opts = opts || {};
+  if (opts.mapModel.get('renderMode') === RenderModes.VECTOR) {
+    console.warn('Vector rendering is not supported anymore');
   }
-  return new LeafletCartoDBLayerGroupView(layerGroupModel, mapModel);
+  return new LeafletCartoDBLayerGroupView(layerGroupModel, opts);
 };
 
-var LeafletLayerViewFactory = function (options) {
-  options = options || {};
-  this._vector = options.vector;
-  this._webgl = options.webgl;
-};
+var LeafletLayerViewFactory = function () { };
 
 LeafletLayerViewFactory.prototype._constructors = {
   'tiled': LeafletTiledLayerView,
@@ -29,7 +26,7 @@ LeafletLayerViewFactory.prototype._constructors = {
   'raster_tileo' : LeafletRasterTileoLayerView
 };
 
-LeafletLayerViewFactory.prototype.createLayerView = function (layerModel, nativeMap, mapModel) {
+LeafletLayerViewFactory.prototype.createLayerView = function (layerModel, opts) {
   if (! !!layerModel.get('type')) {
      layerModel.set('type','tiled');
      layerModel.set('urlTemplate',layerModel.get('_url'));
@@ -37,16 +34,15 @@ LeafletLayerViewFactory.prototype.createLayerView = function (layerModel, native
      layerModel.set('url',"http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png");
   }
   
-  layerModel.attributes.order = (layerModel.attributes.type == 'raster_tileo') ? 1 : layerModel.attributes.order;
   var layerType = layerModel.get('type').toLowerCase();
   var LayerViewClass = this._constructors[layerType];
 
   if (LayerViewClass && layerType != 'raster_tileo') { //avoid duplicate rasters
     try {
-      return new LayerViewClass(layerModel, nativeMap, mapModel);
-    } catch (e) {
-      log.error("Error creating an instance of layer view for '" + layerType + "' layer -> " + e.message);
-      throw e;
+      return new LayerViewClass(layerModel, opts);
+    } catch (error) {
+      log.error("Error creating an instance of layer view for '" + layerType + "' layer -> " + error.message);
+      throw error;
     }
   } else if (layerType != 'raster_tileo') {
     log.error("Error creating an instance of layer view for '" + layerType + "' layer. Type is not supported");
