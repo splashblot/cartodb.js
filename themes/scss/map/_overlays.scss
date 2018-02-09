@@ -11,6 +11,11 @@ $buttonColor: #636D72;
   left: 16px;
   align-items: center;
   z-index: 11;
+  pointer-events: none;
+
+  > * {
+    pointer-events: all;
+  }
 }
 
 // zoom overlay
@@ -24,6 +29,7 @@ $buttonColor: #636D72;
   box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.24), 0 4px 8px 0 rgba(0, 0, 0, 0.16);
   z-index: 20000;
 }
+
 .CDB-Zoom {
   order: 1;
   margin-right: 8px;
@@ -40,7 +46,7 @@ $buttonColor: #636D72;
   z-index: 10;
 
   &:hover {
-    background: #F9F9F9;
+    background: rgba($cBlue, 0.08);
     cursor: pointer;
   }
 
@@ -54,11 +60,13 @@ $buttonColor: #636D72;
     border-top-right-radius: 4px;
     border-bottom-right-radius: 4px;
   }
+
   &:first-child {
     border-top-left-radius: 4px;
     border-bottom-left-radius: 4px;
   }
 }
+
 .CDB-Zoom-action--out::before {
   position: absolute;
   top: 50%;
@@ -69,6 +77,7 @@ $buttonColor: #636D72;
   background: $buttonColor;
   content: '';
 }
+
 .CDB-Zoom-action--in {
   &::before {
     position: absolute;
@@ -80,6 +89,7 @@ $buttonColor: #636D72;
     background: $buttonColor;
     content: '';
   }
+
   &::after {
     position: absolute;
     top: 11px;
@@ -106,30 +116,46 @@ $buttonColor: #636D72;
   order: 2;
   height: 32px;
   margin-right: 8px;
+
+  .CDB-Shape-magnify {
+    width: 32px;
+    height: 32px;
+
+    &::before {
+      top: 11px;
+      left: 10px;
+      border-color: #636D72;
+    }
+
+    &::after {
+      bottom: 10px;
+      left: 17px;
+      background: #636D72;
+    }
+
+    .is-small::after {
+      left: 17px;
+    }
+  }
 }
-.CDB-Search .CDB-Shape-magnify::before {
-  top: 11px;
-  left: 10px;
-  border-color: #636D72;
-}
-.CDB-Search .CDB-Shape-magnify::after {
-  right: 13px;
-  bottom: 10px;
-  background: #636D72;
-}
+
 .CDB-Search-inner {
   @include transition(width, 100ms ease-in);
   display: flex;
-  align-items: center;
   width: 32px;
   height: 100%;
   overflow: hidden;
 
   &.is-active {
     width: 152px;
+
+    &:hover {
+      background: transparent;
+    }
+
     .CDB-Search-text {
-      display: block;
       opacity: 1;
+      visibility: visible;
     }
   }
 }
@@ -138,17 +164,23 @@ $buttonColor: #636D72;
   width: 32px;
   height: 32px;
   color: $buttonColor;
+
+  &:hover {
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    background: rgba($cBlue, 0.08);
+  }
 }
 .CDB-Search-text {
-  @include transition(opacity, 150ms ease-in);
-  display: none;
   width: 100px;
   padding: 0 0 0 8px;
+  transition: all 150ms ease-in;
   border: 0;
   border-left: 1px solid #F8F8F8;
   background: none;
   font: 12px/16px 'Open Sans';
   opacity: 0;
+  visibility: hidden;
 
   &:focus {
     outline: none;
@@ -160,7 +192,9 @@ $buttonColor: #636D72;
   order: 4;
   width: 32px;
   height: 32px;
+  margin-right: 8px;
   cursor: pointer;
+
   .CDB-Shape-Arrow::after,
   .CDB-Shape-Arrow::before {
     background: #636D72;
@@ -243,25 +277,13 @@ $maxLegendContainerHeight: 300px;
 }
 .CDB-Legends-canvasShadow.is-visible {
   display: block;
-  z-index: 10;
+  z-index: 2;
 }
 .CDB-Legends-canvas .ps-scrollbar-y-rail {
-  width: 2px !important; // Resetting standard scroll track color
-  background: #EEE;
   z-index: 3;
-}
-.CDB-Legends-canvas .ps-scrollbar-y {
-  width: 2px !important; // Resetting standard scroll bar color
-  background: #AAA;
 }
 .CDB-Legends-canvas .ps-scrollbar-x-rail {
-  height: 2px !important; // Resetting standard scroll track color
-  background: #EEE;
   z-index: 3;
-}
-.CDB-Legends-canvas .ps-scrollbar-x {
-  height: 3px !important; // Resetting standard scroll bar color
-  background: #AAA;
 }
 
 .CDB-LayerLegends {
@@ -294,85 +316,86 @@ $maxLegendContainerHeight: 300px;
 }
 
 .Bubble-list {
-  @include display-flex();
-  @include justify-content(center);
-  position: relative;
-  width: 100px;
+  width: 100%;
   height: 100px;
 }
-.Bubble-list::before {
-  position: absolute;
-  right: 50%;
-  bottom: 0;
-  width: 140px;
-  height: 1px;
-  background: rgba(0, 0, 0, 0.08);
-  content: '';
-  visibility: visible;
-}
+
 .Bubble-item {
-  @include opacity(0.5);
-  @include transform(translateX(-50%));
   position: absolute;
-  bottom: 0;
-  left: 50%;
+  width: 100%;
+  height: 100px;
 }
 
 .Bubble-container {
-  @include display-flex();
-  max-height: 100px;
-  padding-top: 3px;
-  padding-bottom: 8px;
+  position: relative;
+  top: 7px;
+  right: 0;
+  width: 100%;
+  height: 100px;
+  margin-top: 10px;
 }
+
+.Bubble-circle {
+  @include opacity(0.5);
+  position: absolute;
+  right: 0;
+  width: 100px;
+  height: 100%;
+}
+
 .Bubble-itemCircle {
   display: block;
-  position: relative;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
   width: 100%;
   height: 100%;
+  transform: translate3d(-50%, 0, 0);
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 50%;
   background: #F8AB17;
   box-shadow: -1px 0 2px 0 rgba(0, 0, 0, 0.1);
   pointer-events: none;
 }
-.Bubble-item::before {
+
+.Bubble-label {
   position: absolute;
-  top: 5px;
-  right: 50%;
-  width: 140px;
-  height: 1px;
-  background: rgba(0, 0, 0, 0.08);
-  content: '';
+  bottom: 0;
+  width: calc(100% - 50px);
+
+  &::after {
+    position: absolute;
+    top: -1px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: rgba(#000, 0.08);
+    content: '';
+    z-index: -1;
+  }
 }
+
 .Bubble-list--custom::before,
 .Bubble-item--custom::before {
   visibility: hidden;
 }
-.Bubble-numbers {
-  position: relative;
-}
+
 .Bubble-numbersItem {
-  position: absolute;
-  margin-bottom: -11px; /* to review */
-  padding-right: $baseSize * 2;
+  display: inline-block;
+  padding-right: 5px;
+  transform: translate3d(0, -50%, 0);
   background: rgba(#FFF, 0.8);
-  z-index: 10;
-  &:last-child {
-    background: #FFF;
-  }
 }
-.Bubble-inner {
-  @include display-flex();
-  position: relative;
-}
+
 .Bubble-average {
   @include transform(translateY(50%));
   display: block;
   position: absolute;
-  right: 105px;
+  right: 102px;
   white-space: nowrap;
   z-index: 1000;
 }
+
 .Bubble-average::after {
   display: block;
   position: absolute;
@@ -501,5 +524,13 @@ $maxLegendContainerHeight: 300px;
   .CDB-Zoom-info,
   .CDB-Fullscreen {
     display: none;
+  }
+}
+
+@media (max-width: 425px) {
+  .CDB-Logo {
+    right: 0;
+    left: initial;
+    transform: initial;
   }
 }

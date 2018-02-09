@@ -1,27 +1,26 @@
+/* global L */
 var _ = require('underscore');
-var L = require('leaflet');
 var LeafletLayerView = require('./leaflet-layer-view');
 
-var LeafletPlainLayerView = function (layerModel, leafletMap) {
+var LeafletPlainLayerView = function (layerModel, opts) {
   LeafletLayerView.apply(this, arguments);
-}
+};
 
 LeafletPlainLayerView.prototype = _.extend(
   {},
   LeafletLayerView.prototype,
   {
-    _createLeafletLayer: function (layerModel) {
-      var self = this;
+    _createLeafletLayer: function () {
       var leafletLayer = new L.Layer();
 
       leafletLayer.onAdd = function () {
-        self._redraw();
-      };
+        this._redraw();
+      }.bind(this);
 
       leafletLayer.onRemove = function () {
-        var div = self.leafletMap.getContainer();
+        var div = this.leafletMap.getContainer();
         div.style.background = 'none';
-      };
+      }.bind(this);
 
       leafletLayer.setZIndex = function () {};
 
@@ -33,7 +32,7 @@ LeafletPlainLayerView.prototype = _.extend(
     },
 
     _redraw: function () {
-      var div = this.leafletMap.getContainer()
+      var div = this.leafletMap.getContainer();
       div.style.backgroundColor = this.model.get('color') || '#FFF';
 
       if (this.model.get('image')) {

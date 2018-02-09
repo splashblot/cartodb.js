@@ -16,11 +16,15 @@ var RasterLayer = LayerModelBase.extend({
   initialize: function (attrs, options) {
     attrs = attrs || {};
     options = options || {};
-    if (!options.vis) throw new Error('vis is required');
+    if (!options.engine) throw new Error('engine is required');
 
-    this._vis = options.vis;
+    this._engine = options.engine;
     if (attrs && attrs.cartocss) {
       this.set('initialStyle', attrs.cartocss);
+    }
+    
+    if (attrs.source) {
+      this.setSource(attrs.source);
     }
 
     // Hopefully in the future (@apercas) => legends ✓
@@ -31,7 +35,7 @@ var RasterLayer = LayerModelBase.extend({
       this.unset('tooltip');
 
       this.legends = new Legends(attrs.legends, {
-        visModel: this._vis
+        engine: this._engine
       });
       this.unset('legends');
 
@@ -59,7 +63,7 @@ var RasterLayer = LayerModelBase.extend({
   },
 
   _reloadVis: function () {
-    this._vis.reload({
+    this._engine.reload({
       sourceId: this.get('id')
     });
   },
@@ -76,6 +80,28 @@ var RasterLayer = LayerModelBase.extend({
     return this.get('visible');
   },
 
+ getSourceId: function () {
+    var source = this.getSource();
+    return source && source.id;
+  },
+
+  getSource: function () {
+    return this.get('source');
+  },
+
+  setSource: function (newSource, options) {
+    if (this.getSource()) {
+      this.getSource().unmarkAsSourceOf(this);
+    }
+    newSource.markAsSourceOf(this);
+    this.set('source', newSource, options);
+  },
+
+  isInteractive: function () {
+    // By default it has one field (cartodb_id)
+    // return this.getInteractiveColumnNames().length > 1;
+    return false;
+  },
   _hasInfowindowFields: function () {
     return this.infowindow.hasFields();
   },

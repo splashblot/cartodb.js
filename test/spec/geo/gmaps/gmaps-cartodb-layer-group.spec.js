@@ -1,38 +1,41 @@
 /* global google */
-var GmapsCartoDBLayerGroupView = require('../../../../src/geo/gmaps/gmaps-cartodb-layer-group-view');
-var SharedTestsForCartoDBLayerGroupViews = require('../shared-tests-for-cartodb-layer-group-views');
-var FakeWax = require('../fake-wax');
+var GoogleCartoDBLayerGroupClass = require('../../../../src/geo/gmaps/gmaps-cartodb-layer-group-view');
+var cartoLayerGroupViewTests = require('../shared-tests-for-carto-layer-group');
 
-GmapsCartoDBLayerGroupView.prototype.interactionClass = FakeWax;
+describe('gmaps-cartodb-layer-group-view', function () {
+  /**
+   * Helper function used to get a google map in the shared tests.
+   */
+  function createNativeMap (container) {
+    // Create a leaflet map inside a container
+    container.setAttribute('id', 'map');
+    container.style.height = '200px';
+    document.body.appendChild(container);
+    var googleMap = new google.maps.Map(document.getElementById('map'), {
+      zoom: 4,
+      center: { lat: 47.84808037632246, lng: 14.2822265625 }
+    });
+    return googleMap;
+  }
 
-var createLayerGroupView = function (layerGroupModel, container) {
-  var gmapsMap = new google.maps.Map(container, {
-    center: new google.maps.LatLng(0, 0),
-    zoom: 3,
-    disableDefaultUI: true,
-    mapTypeControl: false,
-    mapTypeId: google.maps.MapTypeId.ROADMAP,
-    backgroundColor: 'white',
-    tilt: 0
-  });
+  /**
+   * Helper function used to get the tiles in the shared tests
+   */
+  function getTileUrl (layerGroupView) {
+    return layerGroupView.options.tiles[0].replace('{s}', '0');
+  }
 
-  var layerGroupView = new GmapsCartoDBLayerGroupView(layerGroupModel, gmapsMap);
-  gmapsMap.overlayMapTypes.setAt(1, layerGroupView.gmapsLayer);
-  return layerGroupView;
-};
+  /**
+   * Gmaps events and Leaflet events are different.
+   */
+  var event = {
+    da: { x: 121.8125, y: 94.56249999999997 },
+    data: { name: 'fakeCityName', cartodb_id: 123 },
+    e: { type: 'mousemove' },
+    latLng: { lat: function () { return 42.48830197960228; }, lng: function () { return -8.701171875; } },
+    layer: 0,
+    pixel: { x: 243, y: 274 }
+  };
 
-var expectTileURLTemplateToMatch = function (layerGroupView, expectedTileURLTemplate) {
-  expect(removeSubdomainFromTileURL(expectedTileURLTemplate)).toEqual(layerGroupView.options.tiles[0]);
-};
-
-var removeSubdomainFromTileURL = function (tileURL) {
-  return tileURL.replace('{s}', '0');
-};
-
-var fireNativeEvent = function (layerGroupView, eventName) {
-  layerGroupView.trigger(eventName);
-};
-
-describe('src/geo/gmaps/gmaps-cartodb-layer-group-view.js', function () {
-  SharedTestsForCartoDBLayerGroupViews.call(this, createLayerGroupView, expectTileURLTemplateToMatch, fireNativeEvent);
+  cartoLayerGroupViewTests(createNativeMap, GoogleCartoDBLayerGroupClass, getTileUrl, event);
 });

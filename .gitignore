@@ -5,9 +5,8 @@
 .tmp
 .vscode
 *.swp
-bower_components
-cartodb.js-bower/
 dist
+docs
 Gemfile.lock
 node_modules
 npm-debug.log
@@ -17,4 +16,3 @@ themes/css/all.css
 themes/css/cartodb.ie.css
 themes/css/cartodb.css
 yarn.lock
-
